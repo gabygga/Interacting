@@ -7747,11 +7747,16 @@ int perturb_derivs(double tau,
       /*delta_0*/
       dy[pv->index_pt_delta_sfdm_1] = -a_prime_over_a*((3.*sin_sfdm(pba,theta_sfdm_1)+omega_sfdm_1*(1.-cos_sfdm(pba,theta_sfdm_1)))*delta1_sfdm_1
                                                          -omega_sfdm_1*sin_sfdm(pba,theta_sfdm_1)*delta_sfdm_1)
-        -metric_continuity*(1.-cos_sfdm(pba,theta_sfdm_1)); //metric_continuity = h'/2;
+        -metric_continuity*(1.-cos_sfdm(pba,theta_sfdm_1))
+        -pba->beta*sqrt(8*_PI_*_G_)*a_prime_over_a*exp(-0.5*alpha_sfdm_1)*(sqrt(2./3.)*sin_sfdm(pba, 0.5*theta_sfdm_1)*pv->index_pt_phi_prime_scf
+                                       -pvecback[pba->index_bg_phi_prime_scf]/sqrt(6.)*(sin_sfdm(pba, 0.5*theta_sfdm_1))*delta_sfdm_1-2*cos_sfdm(pba, 0.5*theta_sfdm_1)*delta1_sfdm_1);
+; //metric_continuity = h'/2;
       /*delta_1*/
       dy[pv->index_pt_delta1_sfdm_1] = -a_prime_over_a*((3.*cos_sfdm(pba,theta_sfdm_1)+(omega_sfdm_1-0.5*pba->sfdm_parameters_1[1]*exp(alpha_sfdm_1)/y1_sfdm_1)*sin_sfdm(pba,theta_sfdm_1))*delta1_sfdm_1
                                        -((omega_sfdm_1-0.5*pba->sfdm_parameters_1[1]*exp(alpha_sfdm_1)/y1_sfdm_1)*(1.+cos_sfdm(pba,theta_sfdm_1))*delta_sfdm_1))
-                                       -metric_continuity*sin_sfdm(pba,theta_sfdm_1);
+                                       -metric_continuity*sin_sfdm(pba,theta_sfdm_1)
+                                       -pba->beta*sqrt(8*_PI_*_G_)*a_prime_over_a*exp(-0.5*alpha_sfdm_1)*(sqrt(2./3.)*cos_sfdm(pba, 0.5*theta_sfdm_1)*pv->index_pt_phi_prime_scf
+                                       -pvecback[pba->index_bg_phi_prime_scf]/sqrt(6.)*(sin_sfdm(pba, 0.5*theta_sfdm_1))*delta1_sfdm_1+2*cos_sfdm(pba, 0.5*theta_sfdm_1)*delta_sfdm_1);
      }
      if(pba->sfdm_parameters_1[1] < 0.){
        dy[pv->index_pt_omega_sfdm_1] = a_prime_over_a*omega_sfdm_1*(1.5*pvecback[pba->index_bg_w_tot_1] - 0.5 - 0.5*pba->sfdm_parameters_1[1]*
@@ -7827,7 +7832,8 @@ int perturb_derivs(double tau,
 
       dy[pv->index_pt_phi_prime_scf] =  - 2.*a_prime_over_a*y[pv->index_pt_phi_prime_scf]
         - metric_continuity*pvecback[pba->index_bg_phi_prime_scf] //  metric_continuity = h'/2
-        - (k2 + a2*pvecback[pba->index_bg_ddV_scf])*y[pv->index_pt_phi_scf]; //checked
+        - (k2 + a2*pvecback[pba->index_bg_ddV_scf])*y[pv->index_pt_phi_scf]
+        +pba->beta*a_prime_over_a/sqrt(8*_PI_*_G_)*sqrt(3/2)*exp(0.5*y[pba->index_bi_alpha_sfdm_1])*(delta1_sfdm_1*cos_sfdm(pba,0.5*theta_sfdm_1)+delta_sfdm_1*sin_sfdm(pba, 0.5*theta_sfdm_1)); //checked
 
     }
 

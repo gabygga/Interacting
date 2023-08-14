@@ -2436,7 +2436,8 @@ int background_derivs(
       dy[pba->index_bi_alpha_sfdm_1] = 3.*y[pba->index_bi_a]*pvecback[pba->index_bg_H]*
         (pvecback[pba->index_bg_w_tot_1]+cos_sfdm(pba,y[pba->index_bi_theta_sfdm_1]))-2*pba->beta*sqrt(8*_PI_*_G_)*exp(-0.5*y[pba->index_bi_alpha_sfdm_1])*sin_sfdm(pba,0.5*y[pba->index_bi_theta_sfdm_1])*dy[pba->index_bi_phi_prime_scf]/(sqrt(6.)*pvecback[pba->index_bg_H]);/*Modification*/
       dy[pba->index_bi_theta_sfdm_1] = y[pba->index_bi_a]*pvecback[pba->index_bg_H]*
-        (-3.*sin_sfdm(pba,y[pba->index_bi_theta_sfdm_1])+y[pba->index_bi_y1_sfdm_1])-2*pba->beta*sqrt(8*_PI_*_G_)*exp(-0.5*y[pba->index_bi_alpha_sfdm_1])*cos_sfdm(pba,0.5*y[pba->index_bi_theta_sfdm_1])*dy[pba->index_bi_phi_prime_scf]/(sqrt(6.)*pvecback[pba->index_bg_H]);
+        (-3.*sin_sfdm(pba,y[pba->index_bi_theta_sfdm_1])+y[pba->index_bi_y1_sfdm_1]) /*Modification*/
+        -2*pba->beta*sqrt(8*_PI_*_G_)*exp(-0.5*y[pba->index_bi_alpha_sfdm_1])*cos_sfdm(pba,0.5*y[pba->index_bi_theta_sfdm_1])*dy[pba->index_bi_phi_prime_scf]/(sqrt(6.)*pvecback[pba->index_bg_H]);
       dy[pba->index_bi_y1_sfdm_1] = y[pba->index_bi_a]*pvecback[pba->index_bg_H]*
         (1.5*(1.+pvecback[pba->index_bg_w_tot_1])*y[pba->index_bi_y1_sfdm_1]
         + y2_sfdm(pba, y[pba->index_bi_alpha_sfdm_1], y[pba->index_bi_theta_sfdm_1], y[pba->index_bi_y1_sfdm_1], pba->sfdm_parameters_1[1])*
@@ -2496,7 +2497,7 @@ int background_derivs(
     dy[pba->index_bi_phi_scf] = y[pba->index_bi_phi_prime_scf];
     dy[pba->index_bi_phi_prime_scf] = - y[pba->index_bi_a]*
       (2*pvecback[pba->index_bg_H]*y[pba->index_bi_phi_prime_scf]
-       + y[pba->index_bi_a]*dV_scf(pba,y[pba->index_bi_phi_scf])) + pba->beta*pvecback[pba->index_bg_H]*sqrt(6.)*exp(-0.5*y[pba->index_bi_alpha_sfdm_1])*sin_sfdm(pba,0.5*y[pba->index_bi_theta_sfdm_1])/(8*_PI_*_G_)/y[pba->index_bi_a];
+       + y[pba->index_bi_a]*dV_scf(pba,y[pba->index_bi_phi_scf])) + pba->beta*y[pba->index_bi_a]*pvecback[pba->index_bg_H]*sqrt(6.)*exp(0.5*y[pba->index_bi_alpha_sfdm_1])*sin_sfdm(pba,0.5*y[pba->index_bi_theta_sfdm_1])/(sqrt(8*_PI_*_G_));
        
   }
 
