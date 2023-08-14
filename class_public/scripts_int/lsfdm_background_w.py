@@ -81,7 +81,7 @@ MQ.set({'a_ini_over_a_today_default':1.e-14, 'Omega_cdm':0.0001,'Omega_sfdm_1':0
 MQ1=Class()
 MQ1.set(common_settings)
 MQ1.set({'a_ini_over_a_today_default':1.e-14, 'Omega_cdm':0.0001,'Omega_sfdm_1':0.264,'Omega_sfdm_2':0.0,'attractor_ic_sfdm_1': 'yes',
-                   'sfdm_parameters_1': '-22., 1.e4, 1.e-2, 1.e-16, 1.e-30',
+                   'sfdm_parameters_1': '-24., 1.e4, 1.e-2, 1.e-16, 1.e-30',
                    'sfdm_tuning_index_1':2})
 
 MQ2=Class()
@@ -167,24 +167,25 @@ p_sfdmQ2=backgroundQ2['(.)p_sfdm_1']
 #plt.semilogx(1/(1+backgroundQ['z']), (backgroundQ['(.)rho_lambda']+backgroundQ['(.)rho_g'])/baCritQ, linestyle='--', label='$\Omega_{\lambda}$')
 #
 #
-plt.semilogx(1/(1+backgroundQ1['z']), (backgroundQ1['(.)rho_lambda'])/baCritQ1, linestyle='-.',c='orchid', label='$\Omega_{\Lambda}$')
-plt.semilogx(1/(1+backgroundQ1['z']), (backgroundQ1['(.)rho_g']+backgroundQ1['(.)rho_ncdm[0]'])/baCritQ1,  color='#0e0e44', linestyle=':', label='$\Omega_{g}$')
-plt.semilogx(1/(1+backgroundQ1['z']), (backgroundQ1['(.)rho_b']+backgroundQ1['(.)rho_sfdm_1'])/baCritQ1, color='aqua',linestyle='-', label='$\Omega_{m}$')
-#plt.semilogx(1/(1+backgroundQ1['z']), (backgroundQ1['(.)rho_sfdm_1']+backgroundQ1['(.)rho_b'])/baCritQ1, color='c',linestyle='-', label='$\lambda=1e4$')
-#
-#plt.semilogx(1/(1+backgroundQ2['z']), (backgroundQ2['(.)rho_g']+backgroundQ2['(.)rho_ncdm[0]'])/baCritQ2, color='c',linestyle=':', label='$\Omega_{g}$, $m_{\phi}=1e-24$')
-#plt.semilogx(1/(1+backgroundQ2['z']), (backgroundQ2['(.)rho_b']+backgroundQ2['(.)rho_cdm'])/baCritQ2, color='c',linestyle='--', label='$\Omega_{m}$')
-#
-plt.xlim([1e-7, 1])
+#plt.semilogx(1/(1+backgroundQ1['z']), (backgroundQ1['(.)rho_lambda'])/baCritQ1, linestyle='-.',c='orchid', label='$\Omega_{\Lambda}$')
+#plt.semilogx(1/(1+backgroundQ1['z']), (backgroundQ1['(.)rho_g']+backgroundQ1['(.)rho_ncdm[0]'])/baCritQ1,  color='#0e0e44', linestyle=':', label='$\Omega_{g}$')
+#plt.semilogx(1/(1+backgroundQ1['z']), (backgroundQ1['(.)rho_b']+backgroundQ1['(.)rho_sfdm_1'])/baCritQ1, color='aqua',linestyle='-', label='$\Omega_{m}$')
+
+plt.semilogx(1/(1+backgroundQ1['z']),backgroundQ1['(.)p_sfdm_1']/backgroundQ1['(.)rho_sfdm_1'],color='aqua', label='$\omega_{m}$')
+plt.semilogx(1/(1+backgroundQ1['z']),((1./3.)*backgroundQ1['(.)rho_g']+backgroundQ1['(.)p_ncdm[0]']+backgroundQ1['(.)p_sfdm_1']-backgroundQ1['(.)rho_lambda'])/(backgroundQ1['(.)rho_sfdm_1']+backgroundQ1['(.)rho_g']+backgroundQ1['(.)rho_ncdm[0]']+backgroundQ1['(.)rho_b']+backgroundQ1['(.)rho_lambda']),color='b', label='$\omega_{eff}$')
+
+plt.semilogx(1/(1+backgroundQ1['z']),1/2+(3/2)*((1./3.)*backgroundQ1['(.)rho_g']+backgroundQ1['(.)p_ncdm[0]']+backgroundQ1['(.)p_sfdm_1']-backgroundQ1['(.)rho_lambda'])/(backgroundQ1['(.)rho_sfdm_1']+backgroundQ1['(.)rho_g']+backgroundQ1['(.)rho_ncdm[0]']+backgroundQ1['(.)rho_b']+backgroundQ1['(.)rho_lambda']), color='g',linestyle='-.', label='$q$')
+
+plt.xlim([1e-7, 1.1])
 #plt.ylim([0.0, 20])
 
 plt.xlabel(r"$a$")
-plt.ylabel(r"$\mathrm{\Omega}$")
+plt.ylabel(r"$\mathrm{\omega}, q$")
 plt.tight_layout()
 plt.legend()
 
 # In[ ]:
 
 
-plt.savefig('scripts/Plots/Omega_trig_c.pdf')
+plt.savefig('scripts/Plots/omega_q_trig.pdf')
 

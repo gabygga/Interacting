@@ -74,26 +74,23 @@ M.set(common_settings)
 MQ=Class()
 MQ.set(common_settings)
 MQ.set({'a_ini_over_a_today_default':1.e-14, 'Omega_cdm':0.0001,'Omega_sfdm_1':0.264,'Omega_sfdm_2':0.0,'attractor_ic_sfdm_1': 'yes',
-                   'sfdm_parameters_1': '-22., 1.e4, 1.e-2, 1.e-16, 1.e-30',
-                   'sfdm_tuning_index_1':2})
-
-##
-MQ1=Class()
-MQ1.set(common_settings)
-MQ1.set({'a_ini_over_a_today_default':1.e-14, 'Omega_cdm':0.0001,'Omega_sfdm_1':0.264,'Omega_sfdm_2':0.0,'attractor_ic_sfdm_1': 'yes',
-                   'sfdm_parameters_1': '-22., 1.e2, 1.e-2, 1.e-16, 1.e-30',
-                   'sfdm_tuning_index_1':2})
-
+                   'sfdm_parameters_1': '-24., 1.e4, 1.e-2, 1.e-16, 1.e-30',
+                   'sfdm_tuning_index_1':2,'Omega_Lambda':0,'Omega_scf':-0.1,'Omega_fld':0.,'Omega_Lambda':0,'attractor_ic_scf': 'no',
+                   'scf_parameters': '11.96, 2.0, 0.004, 22.656, 14.2, 0',
+                   'scf_tuning_index':0,})
 MQ2=Class()
 MQ2.set(common_settings)
+
 MQ2.set({'a_ini_over_a_today_default':1.e-14, 'Omega_cdm':0.0001,'Omega_sfdm_1':0.264,'Omega_sfdm_2':0.0,'attractor_ic_sfdm_1': 'yes',
-                   'sfdm_parameters_1': '-24., 1.e4, 1.e-2, 1.e-16, 1.e-30',
-                   'sfdm_tuning_index_1':2,})
+                   'sfdm_parameters_1': '-24., 1.e4, 1.e-2, 1.e-16, 1.e-30', 'sfdm_tuning_index_1':2,
+                   })
 MQ3=Class()
 MQ3.set(common_settings)
-MQ3.set({'a_ini_over_a_today_default':1.e-14, 'Omega_cdm':0.0001,'Omega_sfdm_1':0.264,'Omega_sfdm_2':0.0,'attractor_ic_sfdm_1': 'yes',
-                   'sfdm_parameters_1': '-26., 0.0, 1.e-2, 1.e-16, 1.e-30',
-                   'sfdm_tuning_index_1':2,})
+
+MQ3.set({'Omega_Lambda':0,'Omega_scf':-0.1,'Omega_fld':0.,'Omega_Lambda':0,'attractor_ic_scf': 'no',
+                   'scf_parameters': '11.96, 2.0, 0.004, 22.656, 14.2, 0',
+                   'scf_tuning_index':0,})
+
 MQ4=Class()
 MQ4.set(common_settings)
 MQ4.set({'a_ini_over_a_today_default':1.e-18, 'Omega_cdm':0.0001,'Omega_sfdm_1':0.25,'Omega_sfdm_2':0.0,'attractor_ic_sfdm_1': 'yes',
@@ -101,11 +98,11 @@ MQ4.set({'a_ini_over_a_today_default':1.e-18, 'Omega_cdm':0.0001,'Omega_sfdm_1':
                    'sfdm_tuning_index_1':2,})
 
 M.compute()
-MQ.compute()
-MQ1.compute()
 MQ2.compute()
-MQ3.compute()
 MQ4.compute()
+MQ.compute()
+MQ3.compute()
+
     #load perturbations
 all_k=M.get_perturbations()
 one_k=all_k['scalar']
@@ -133,24 +130,24 @@ kvec = np.logspace(-4,np.log10(3),1000)
 
 pkM   = []
 pkMQ  = []
-pkMQ1 = []
+pkMQ3 = []
 pkMQ2 = []
 
 for k in kvec:
     pkM.append(M.pk(k,0.))
     pkMQ.append(MQ.pk(k,0.))
-    pkMQ1.append(MQ1.pk(k,0.))
+    pkMQ3.append(MQ3.pk(k,0.))
     pkMQ2.append(MQ2.pk(k,0.))
     h = M.h()
 # plotting
 #################
 #
 
-plt.plot(kvec/h, np.array(pkMQ)/np.array(pkM),'c', alpha=0.5, linestyle=':',label='$m_{\phi}=10^{-22}\\rm{eV},\, \lambda=10^5$')
+plt.plot(kvec/h, np.array(pkMQ3)/np.array(pkM),'m',label='$\psi$')
 
-plt.plot(kvec/h, np.array(pkMQ1)/np.array(pkM),'c',alpha=0.7,linestyle='--',label='$m_{\phi}=10^{-24}\\rm{eV},\,\lambda=10^2$')
+plt.plot(kvec/h, np.array(pkMQ2)/np.array(pkM),'c',alpha=0.6,linestyle=':',label='$\phi:m_{\phi}=10^{-24}eV$')
 
-plt.plot(kvec/h, np.array(pkMQ2)/np.array(pkM),'c' ,linestyle='-', label='$m_{\phi}=10^{-24}\\rm{eV}, \,\lambda=10^4$')
+plt.plot(kvec/h, np.array(pkMQ)/np.array(pkM),'b' ,alpha=0.6, linestyle='--', label='$\psi+\phi$')
 
 #
 #plt.legend(title='Albrecht Skordis')
@@ -159,7 +156,7 @@ plt.legend()
 #plt.ylim([2e-7,2e5])
 plt.xlim([0.00012,3])
 plt.xlabel(r'$k \,\,\,\, [h/\mathrm{Mpc}]$')
-plt.ylabel(r'$P^{\rm sfdm}/P_{\Lambda\rm CDM}$')
+plt.ylabel(r'$P^{\phi,\psi}/P_{\Lambda\rm CDM}$')
 
-plt.savefig('scripts/Plots/MPS_sfdm_wh.pdf')
+plt.savefig('scripts/Plots/MPS_AS_DM_draft.pdf')
     

@@ -5,6 +5,10 @@ from classy import Class
 from scipy.optimize import fsolve
 from scipy.interpolate import interp1d
 import math
+import scienceplots
+
+plt.style.use(['science','ieee'])
+
 
 k_out = [0.1] # 1/Mpc
 #
@@ -18,9 +22,9 @@ common_settings = {# we need to set the output field to something although
                    # value of k we want to polot in [1/Mpc]
                    'k_output_values': str(k_out).strip('[]'),
                    # LambdaCDM parameters
-                   #'h':0.6732117,
-                   'h':0.72,
-                   'beta':1e-30,
+                   'h':0.6732117,
+                   #'h':0.72,
+                   #'beta':1.e-29,
                    'omega_b':0.02238280,
                    #'omega_cdm':0.1201075,
                    'A_s':2.100549e-09 ,
@@ -72,10 +76,10 @@ M.set(common_settings)
 ##
 MQ=Class()
 MQ.set(common_settings)
-MQ.set({'a_ini_over_a_today_default':1.e-14, 'Omega_cdm':0.0001,'Omega_sfdm_1':0.25,'Omega_sfdm_2':0.0,'attractor_ic_sfdm_1': 'yes',
-                   'sfdm_parameters_1': '-24., 0.0, 1.e-2, 1.e-16, 1.e-30',
+MQ.set({'a_ini_over_a_today_default':1.e-14, 'Omega_cdm':0.0001,'Omega_sfdm_1':0.264,'Omega_sfdm_2':0.0,'attractor_ic_sfdm_1': 'yes',
+                   'sfdm_parameters_1': '-22., 1.e4, 1.e-2, 1.e-16, 1.e-30',
                    'sfdm_tuning_index_1':2,'Omega_Lambda':0,'Omega_scf':-0.1,'Omega_fld':0.,'Omega_Lambda':0,'attractor_ic_scf': 'no',
-                   'scf_parameters': '7.812, 2.0, 0.01, 34.8, 23.5, 0.0',
+                   'scf_parameters': '11.96, 2.0, 0.004, 22.656, 14.2, 0',
                    'scf_tuning_index':0,})
 
 
@@ -109,26 +113,27 @@ rho_gQ =backgroundQ['(.)rho_g']
 rho_bQ =backgroundQ['(.)rho_b']
 ##
 
-#plt.semilogx(1/(1+backgroundQ['z']), (backgroundQ['(.)rho_g']+backgroundQ['(.)rho_ncdm[0]'])/baCritQ, color='b',linestyle='-', label='$\Omega_{rad}$')
-#plt.semilogx(1/(1+backgroundQ['z']), (backgroundQ['(.)rho_b']+backgroundQ['(.)rho_cdm'])/baCritQ, color='g',linestyle='--', label='$\Omega_{b}$')
-#plt.semilogx(1/(1+backgroundQ['z']), (backgroundQ['(.)rho_scf'])/baCritQ, color='c',linestyle='-', label='$\Omega_{quint}$')
-#plt.semilogx(1/(1+backgroundQ['z']), (backgroundQ['(.)rho_sfdm_1'])/baCritQ, color='m',linestyle='-', label='$\Omega_{sfdm}$')
-#plt.semilogx(1/(1+backgroundQ['z']), (backgroundQ['(.)p_scf'])/(backgroundQ['(.)rho_scf']), color='c',linestyle='-', label='$\omega_{quint}$')
-#plt.semilogx(1/(1+backgroundQ['z']),  (backgroundQ['(.)p_sfdm_1'])/(backgroundQ['(.)rho_sfdm_1']), color='m',linestyle='-', label='$\omega_{sfdm}$')
-plt.semilogx(1/(1+backgroundQ['z']),  (backgroundQ["phi_scf"]), color='m',linestyle='-', label='$\Phi_{prime}$')
+#plt.semilogx(1/(1+backgroundQ['z']), (backgroundQ['(.)rho_g']+backgroundQ['(.)rho_ncdm[0]'])/baCritQ, color='r',linestyle='--', label='$\Omega_{g}$')
+#plt.semilogx(1/(1+backgroundQ['z']), (backgroundQ['(.)rho_b']+backgroundQ['(.)rho_cdm'])/baCritQ, color='g',linestyle='-.', label='$\Omega_{b}$')
+#plt.semilogx(1/(1+backgroundQ['z']), (backgroundQ['(.)rho_scf'])/baCritQ, color='m',linestyle='-', label='$\Omega_{\psi}:\\lambda=12, A=0.004, B=22.66$')
+#plt.semilogx(1/(1+backgroundQ['z']), (backgroundQ['(.)rho_b']+backgroundQ['(.)rho_sfdm_1'])/baCritQ, color='c',alpha=0.6, label='$\Omega_{m}:m_{\phi}=10^{-22}\\rm{eV}, \lambda_{\phi}=10^4$')
+plt.semilogx(1/(1+backgroundQ['z']), (backgroundQ['(.)p_scf'])/(backgroundQ['(.)rho_scf']), color='m',  linestyle='-', label='$w_{\psi}$')
+plt.semilogx(1/(1+backgroundQ['z']),  (backgroundQ['(.)p_sfdm_1'])/(backgroundQ['(.)rho_sfdm_1']), color='c',alpha=0.6,linestyle='-', label='$w_{\phi}$')
+plt.semilogx(1/(1+backgroundQ['z']),  (backgroundQ['(.)p_sfdm_1']+backgroundQ['(.)p_scf']+(1./3.)*backgroundQ['(.)rho_g']+backgroundQ['(.)p_ncdm[0]'])/(backgroundQ['(.)rho_sfdm_1']+backgroundQ['(.)rho_scf']+backgroundQ['(.)rho_g']+backgroundQ['(.)rho_ncdm[0]']+backgroundQ['(.)rho_b']), label='$w_{T}$')
+plt.semilogx(1/(1+backgroundQ['z']), -1./3.*backgroundQ['z']/backgroundQ['z'], linestyle='--', color='k', alpha=0.4)
 
 #
 #
-plt.xlim([1e-15, 1.1])
+plt.xlim([5e-15, 1.1])
 #plt.ylim([0.0, 20])
 
 plt.xlabel(r"$a$")
-plt.ylabel(r"$\mathrm{\Omega}$")
+plt.ylabel(r"$w$")
 plt.tight_layout()
-plt.legend(title='$m_{\phi}=1e-24$')
+plt.legend()
 
 # In[ ]:
 
 
-plt.savefig('scripts/Plots/phi_sfdm_quint_beta2.pdf')
+plt.savefig('scripts/Plots/omega_2sf.pdf')
 

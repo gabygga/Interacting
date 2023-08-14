@@ -18,7 +18,7 @@ common_settings = {# we need to set the output field to something although
                    # value of k we want to polot in [1/Mpc]
                    'k_output_values': str(k_out).strip('[]'),
                    # LambdaCDM parameters
-                   'a_ini_over_a_today_default': 1.e-30,
+                   'a_ini_over_a_today_default': 1.e-14,
                    'h':0.6732117,
                    'omega_b':0.02238280,
                    'omega_cdm':0.1201075,
@@ -29,7 +29,7 @@ common_settings = {# we need to set the output field to something although
                    'N_ncdm':1,
                    'deg_ncdm':3,
                    'm_ncdm': 0.02,
-                   'beta':1e-11,
+                   'beta':0,
                 # Take fixed value for primordial Helium (instead of automatic BBN adjustment)
                    'YHe': 0.2454006,
                    #'Omega_Lambda': ,
@@ -76,17 +76,17 @@ MQ.set({'Omega_Lambda':1e-7,'Omega_scf':-0.1,'Omega_fld':0.,'attractor_ic_scf': 
 MQ2=Class()
 MQ2.set(common_settings)
 MQ2.set({'Omega_Lambda':1e-5,'Omega_scf':-0.1,'Omega_fld':0.,'attractor_ic_scf': 'no',
-                   'scf_parameters': '7.81, 2.0, 0.01, 34.8, 22, 0.0',
+                   'scf_parameters': '7.996, 2.0, 0.01, 34.001, 22, 0.0',
                    'scf_tuning_index':0,})
 MQ3=Class()
 MQ3.set(common_settings)
 MQ3.set({'Omega_Lambda':1e-5,'Omega_scf':-0.1,'Omega_fld':0.,'attractor_ic_scf': 'no',
-                   'scf_parameters': '10, 2.0, 0.008,27.2, 17.2, 0.0',
+                   'scf_parameters': '9.99, 2.0, 0.008,27.1872, 17.2, 0.0',
                    'scf_tuning_index':0,})
 MQ4=Class()
 MQ4.set(common_settings)
 MQ4.set({'Omega_Lambda':1e-5,'Omega_scf':-0.1,'Omega_fld':0.,'attractor_ic_scf': 'no',
-                   'scf_parameters': '12, 2.0, 0.004,22.66, 14.2, 0.0',
+                   'scf_parameters': '11.96, 2.0, 0.004,22.656, 14.2, 0.0',
                    'scf_tuning_index':0,})
 
 M.compute()
@@ -190,5 +190,4 @@ plt.legend(title='$\lambda=4, \\alpha=2, A=0.03, B=67.86, \phi_{ini}=22, \dot{\p
 # In[ ]:
 
 
-plt.savefig('scripts/Plots/AS_explo2.pdf')
-
+plt.savefig('scripts/Plots/AS_explo_corr.pdf')

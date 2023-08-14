@@ -5,9 +5,6 @@ from classy import Class
 from scipy.optimize import fsolve
 from scipy.interpolate import interp1d
 import math
-import scienceplots
-
-plt.style.use(['science','ieee'])
 
 k_out = [0.1] # 1/Mpc
 #
@@ -21,7 +18,6 @@ common_settings = {# we need to set the output field to something although
                    # value of k we want to polot in [1/Mpc]
                    'k_output_values': str(k_out).strip('[]'),
                    # LambdaCDM parameters
-                   'a_ini_over_a_today_default': 1.e-15,
                    'h':0.6732117,
                    'omega_b':0.02238280,
                    'omega_cdm':0.1201075,
@@ -68,36 +64,26 @@ backgroundQ3= {}
     #
 M = Class()
 M.set(common_settings)
-
-
 MQ=Class()
 MQ.set(common_settings)
 MQ.set({'Omega_Lambda':1e-7,'Omega_scf':-0.1,'Omega_fld':0.,'attractor_ic_scf': 'no',
-                   'scf_parameters': '9, 2.0, 0.01, 30.2203, 19, 0.0',
+                   'scf_parameters': '9, 2.0,0.01, 30.2203, 19, 0.0',
                    'scf_tuning_index':0,})
-
 MQ2=Class()
 MQ2.set(common_settings)
 MQ2.set({'Omega_Lambda':1e-5,'Omega_scf':-0.1,'Omega_fld':0.,'attractor_ic_scf': 'no',
-                   'scf_parameters': '7.996, 2.0, 0.01, 34.001, 22, 0.0',
+                   'scf_parameters': '10, 2.0, 0.01, 27.2, 17.2, 0.0',
                    'scf_tuning_index':0,})
 MQ3=Class()
 MQ3.set(common_settings)
 MQ3.set({'Omega_Lambda':1e-5,'Omega_scf':-0.1,'Omega_fld':0.,'attractor_ic_scf': 'no',
-                   'scf_parameters': '9.99, 2.0, 0.008,27.1872, 17.2, 0.0',
-                   'scf_tuning_index':0,})
-MQ4=Class()
-MQ4.set(common_settings)
-MQ4.set({'Omega_Lambda':1e-5,'Omega_scf':-0.1,'Omega_fld':0.,'attractor_ic_scf': 'no',
-                   'scf_parameters': '11.96, 2.0, 0.004,22.656, 14.2, 0.0',
+                   'scf_parameters': '10, 0.0, 10, 0.0, 20, 0.0',
                    'scf_tuning_index':0,})
 
 M.compute()
 MQ.compute()
 MQ2.compute()
 MQ3.compute()
-MQ4.compute()
-
     #load perturbations
 all_k=M.get_perturbations()
 one_k=all_k['scalar']
@@ -114,72 +100,54 @@ backgroundQ2 = MQ2.get_background()
 all_kQ3=MQ3.get_perturbations()
 one_kQ3=all_kQ3['scalar']
 backgroundQ3 = MQ3.get_background()
-  ###
-all_kQ4=MQ4.get_perturbations()
-one_kQ4=all_kQ4['scalar']
-backgroundQ4 = MQ4.get_background()
-  
+   
 
     ###
-#  print(background.keys())
-#rho_scf=background['rho_scf'] 
+#CMB lensed spectra    
+cl_lens0= M.lensed_cl(2500)
+cl_lens1= MQ.lensed_cl(2500)
+cl_lens2= MQ2.lensed_cl(2500)
+cl_lens3= MQ3.lensed_cl(2500)
+
+# plotting
 #################
 #
-baH = background['H [1/Mpc]']
-baT = background['conf. time [Mpc]']
-baa = 1/(1 + background['z'])
-baCC= background['(.)rho_lambda']
-baCrit = background['(.)rho_crit']
-##
-bVQ = backgroundQ['V_scf']
-bppQ = backgroundQ["phi'_scf"]
-baCritQ = backgroundQ['(.)rho_crit']
-rho_scfQ=backgroundQ['(.)rho_scf']
-Omega_scfQ = rho_scfQ/baCritQ
-##
-bVQ2 = backgroundQ2['V_scf']
-bppQ2 = backgroundQ2["phi'_scf"]
-baCritQ2 = backgroundQ2['(.)rho_crit']
-#rho_scfQ2 = (bppQ2*bppQ2/(2*baa*baa) + bVQ2)/3.
-#Omega_scfQ2 = rho_scfQ2/baCritQ2
-##
-bVQ3 = backgroundQ3['V_scf']
-bppQ3 = backgroundQ3["phi'_scf"]
-baCritQ3 = backgroundQ3['(.)rho_crit']
-#rho_scfQ3 = (bppQ3*bppQ3/(2*baa*baa) + bVQ3)/3.
-#Omega_scfQ3 = rho_scfQ3/baCritQ3
-##
-bVQ4 = backgroundQ4['V_scf']
-bppQ4 = backgroundQ4["phi'_scf"]
-baCritQ4 = backgroundQ4['(.)rho_crit']
-#rho_scfQ4 = (bppQ4*bppQ4/(2*baa*baa) + bVQ4)/3.
-#Omega_scfQ4 = rho_scfQ4/baCritQ4
+fig, (D_ell, DeltaD, DeltaD2) = plt.subplots(3,sharex=True,figsize=(8,12))
+fig.subplots_adjust(hspace=0)
+plt.xlim([2,2510])
+#
+ell_l=cl_lens0['ell']
+#Factor for units
+factor_l = (2.726e6)*(2.726e6)*ell_l**2*ell_l*(ell_l+1)/2/np.pi
+# D_ell suma de masas 0.06
+D_ell.plot(ell_l,1e-9*factor_l*cl_lens0['tt'],lw ='2.', color='r',label=r'$\Lambda CDM$')
+D_ell.plot(ell_l,1e-9*factor_l*cl_lens1['tt'],lw ='2.',color='b',label=r'$\lambda = 8, \alpha=2, A=0.01, B=34.8, \phi_{ini}=2.2, \dot{\phi}_{ini}=0 $')
+D_ell.plot(ell_l,1e-9*factor_l*cl_lens2['tt'],lw ='2.',color='g',label=r'$A=40, \lambda=1.4$')
+#D_ell.plot(ell_l,1e-9*factor_l*cl_lens3['tt'],lw ='2.',color='c',label=r'$A=10, \lambda=0.4$')
+### Delta D_ell, suma de masas 0.06
+DeltaD.plot(ell_l,1e-8*factor_l*(cl_lens1['tt']-cl_lens0['tt']),lw ='2.', color='b')
+DeltaD.plot(ell_l,1e-8*factor_l*(cl_lens2['tt']-cl_lens0['tt']),lw ='2.', color='g')
+#DeltaD.plot(ell_l,1e-8*factor_l*(cl_lens3['tt']-cl_lens0['tt']),lw ='2.', color='c')
 
+## Delta D_ell/Delta_LCDM: LCDM es considerado con suma de masas 0.06
+DeltaD2.plot(ell_l,(cl_lens1['tt']-cl_lens0['tt'])/cl_lens0['tt'],lw ='2.',color='b')
+DeltaD2.plot(ell_l,(cl_lens2['tt']-cl_lens0['tt'])/cl_lens0['tt'],lw ='2.',color='g')
+#DeltaD2.plot(ell_l,(cl_lens3['tt']-cl_lens0['tt'])/cl_lens0['tt'],lw ='2.',color='c')
 
-colours = ['g']
-#for name in namelist:
-#    idx = namelist.index(name)
-#    plt.loglog(baLCDM['a'],fLCDM*baLCDM[name],colours[idx]+'-')
-#plt.legend(namelist,loc='upper left')
-#for name in namelist:
-#    idx = namelist.index(name)
-#plt.xlim([0.0, 10.])
-#plt.ylim([0.0, 1.0])
-#plt.semilogx(1/(1+background['z']), baCC/baCritQ,color='r', label='LCDM')
-plt.semilogx(1/(1+backgroundQ4['z']),backgroundQ4['(.)rho_scf']/baCritQ4, color='m', label='$\Omega_{\psi}:\lambda=12, A=0.004, B=22.66$')
-plt.semilogx(1/(1+backgroundQ2['z']), (backgroundQ4['(.)rho_g']+backgroundQ4['(.)rho_ncdm[0]'])/baCritQ4,label='$\Omega_{g}$')
-plt.semilogx(1/(1+backgroundQ2['z']), (backgroundQ4['(.)rho_b']+backgroundQ4['(.)rho_cdm'])/baCritQ4, label='$\Omega_{m}$')
+### Label options
+D_ell.legend(title='Quintessence: Albrecht potential', fontsize='10',ncol=2)
+#D_ell.set_xticks([ 500, 1000, 1500, 2000],["500", "1000", "1500", "2000"])
+D_ell.tick_params(direction='in', top=True, right=True, labeltop=False,length=7,width=1.5)
+D_ell.set_ylabel(r"$\ell^2 D_{\ell} [\mu K^2] \,\,\, (\times 10^{-9})$", fontsize=16)
+D_ell.set_ylim([-0.495, 2.2])
+D_ell.ticklabel_format(useMathText=True)
+DeltaD.set_ylabel(r"$\Delta (\ell^2 D_{\ell}) [\mu K^2] \,\,\,(\times 10^{-8}) $", fontsize=16)
+DeltaD.tick_params(direction='in', top=True, right=True, labeltop=False,length=7,width=1.5)
+DeltaD.ticklabel_format(useMathText=True)
+DeltaD2.set_ylabel(r"$\Delta  D_{\ell}/ D_{\ell}^{\Lambda\rm CDM}  \,\,\, $", fontsize=16)
+DeltaD2.set_xlabel(r"$\ell  \,\,\, $", fontsize=16)
+DeltaD2.tick_params(direction='in', top=True, right=True, labeltop=False,length=7,width=1.5)
+DeltaD2.legend()
+plt.savefig('scripts/Plots/D_ell_TT_AS.pdf',bbox_inches='tight')
 
-#plt.xlim([1e-7, 2])
-#plt.ylim([0.0, 20])
-
-plt.xlabel(r"$a$")
-plt.ylabel(r"$\mathrm{\Omega}$")
-plt.tight_layout()
-plt.legend()
-
-# In[ ]:
-
-
-plt.savefig('scripts/Plots/Omega_AS.pdf')
-
+    

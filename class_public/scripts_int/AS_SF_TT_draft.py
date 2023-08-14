@@ -23,6 +23,7 @@ common_settings = {# we need to set the output field to something although
                    # LambdaCDM parameters
                    'a_ini_over_a_today_default': 1.e-14,
                    'h':0.6732117,
+                   'beta':0, 
                    'omega_b':0.02238280,
                    'Omega_cdm':0.264,
                    'A_s':2.100549e-09 ,
@@ -71,32 +72,41 @@ M.set(common_settings)
 
 MQ=Class()
 MQ.set(common_settings)
-MQ.set({'Omega_Lambda':1e-7,'Omega_scf':-0.1,'Omega_fld':0.,'attractor_ic_scf': 'no',
-                   'scf_parameters': '9, 2.0, 0.01, 30.2203, 19, 0.0',
+
+MQ.set({'a_ini_over_a_today_default':1.e-14, 'Omega_cdm':0.0001,'Omega_sfdm_1':0.264,'Omega_sfdm_2':0.0,'attractor_ic_sfdm_1': 'yes',
+                   'sfdm_parameters_1': '-24., 1.e4, 1.e-2, 1.e-16, 1.e-30',
+                   'sfdm_tuning_index_1':2,'Omega_Lambda':0,'Omega_scf':-0.1,'Omega_fld':0.,'Omega_Lambda':0,'attractor_ic_scf': 'no',
+                   'scf_parameters': '11.96, 2.0, 0.004, 22.656, 14.2, 0',
                    'scf_tuning_index':0,})
 
+MQ1=Class()
+MQ1.set(common_settings)
+
+MQ1.set({'a_ini_over_a_today_default':1.e-14, 'beta':1.e-6,'Omega_cdm':0.0001,'Omega_sfdm_1':0.264,'Omega_sfdm_2':0.0,'attractor_ic_sfdm_1': 'yes',
+                   'sfdm_parameters_1': '-24., 1.e4, 1.e-2, 1.e-16, 1.e-30',
+                   'sfdm_tuning_index_1':2,'Omega_Lambda':0,'Omega_scf':-0.1,'Omega_fld':0.,'Omega_Lambda':0,'attractor_ic_scf': 'no',
+                   'scf_parameters': '11.96, 2.0, 0.004, 22.656, 14.2, 0',
+                   'scf_tuning_index':0,})
 MQ2=Class()
 MQ2.set(common_settings)
-#MQ2.set({'Omega_Lambda':1e-5,'Omega_scf':-0.1,'Omega_fld':0.,'attractor_ic_scf': 'no',
-#                   'scf_parameters': '7.81, 2.0, 0.01, 34.8, 22, 0.0',
-#                   'scf_tuning_index':0,})
+MQ2.set({'a_ini_over_a_today_default':1.e-14, 'beta':5.e-6,'Omega_cdm':0.0001,'Omega_sfdm_1':0.264,'Omega_sfdm_2':0.0,'attractor_ic_sfdm_1': 'yes',
+                   'sfdm_parameters_1': '-24., 1.e4, 1.e-2, 1.e-16, 1.e-30',
+                   'sfdm_tuning_index_1':2,'Omega_Lambda':0,'Omega_scf':-0.1,'Omega_fld':0.,'Omega_Lambda':0,'attractor_ic_scf': 'no',
+                   'scf_parameters': '11.96, 2.0, 0.004, 22.656, 14.2, 0',
+                   'scf_tuning_index':0,})
+
 MQ3=Class()
 MQ3.set(common_settings)
-#MQ3.set({'Omega_Lambda':1e-5,'Omega_scf':-0.1,'Omega_fld':0.,'attractor_ic_scf': 'no',
-#                   'scf_parameters': '10, 2.0, 0.008,27.2, 17.2, 0.0',
-#                   'scf_tuning_index':0,})
-MQ4=Class()
-MQ4.set(common_settings)
-MQ4.set({'Omega_Lambda':1e-5,'Omega_scf':-0.1,'Omega_fld':0.,'attractor_ic_scf': 'no',
-                   'scf_parameters': '11.96, 2.0, 0.004,22.656, 14.2, 0.0',
+
+MQ3.set({'Omega_Lambda':0,'Omega_scf':-0.1,'Omega_fld':0.,'Omega_Lambda':0,'attractor_ic_scf': 'no',
+                   'scf_parameters': '11.96, 2.0, 0.004, 22.656, 14.2, 0',
                    'scf_tuning_index':0,})
 
 M.compute()
 MQ.compute()
+MQ1.compute()
 MQ2.compute()
 MQ3.compute()
-MQ4.compute()
-
     #load perturbations
 all_k=M.get_perturbations()
 one_k=all_k['scalar']
@@ -105,58 +115,51 @@ background = M.get_background()
 all_kQ=MQ.get_perturbations()
 one_kQ=all_kQ['scalar']
 backgroundQ = MQ.get_background()
+    ##
+all_kQ1=MQ1.get_perturbations()
+one_kQ1=all_kQ1['scalar']
+backgroundQ1 = MQ1.get_background()
+
  ###
 all_kQ2=MQ2.get_perturbations()
 one_kQ2=all_kQ2['scalar']
 backgroundQ2 = MQ2.get_background()
-  ###
+ ###
 all_kQ3=MQ3.get_perturbations()
 one_kQ3=all_kQ3['scalar']
 backgroundQ3 = MQ3.get_background()
-  ###
-all_kQ4=MQ4.get_perturbations()
-one_kQ4=all_kQ4['scalar']
-backgroundQ4 = MQ4.get_background()
-  
-#Defining an array of k-values
-kvec = np.logspace(-4,np.log10(3),1000)
+ ###
 
-pkM = []
-pkMQ= []
-pkMQ2 = []
-pkMQ3 = []
-pkMQ4 = []
-for k in kvec:
-    pkM.append(M.pk(k,0.))
-    pkMQ.append(MQ.pk(k,0.))
-    pkMQ2.append(MQ2.pk(k,0.))
-    pkMQ3.append(MQ3.pk(k,0.))
-    pkMQ4.append(MQ4.pk(k,0.))
-h = M.h()
+     ###
+#CMB lensed spectra    
+cl_lens0= M.lensed_cl(2500)
+cl_lensQ= MQ.lensed_cl(2500)
+cl_lens1= MQ1.lensed_cl(2500)
+cl_lens2= MQ2.lensed_cl(2500)
+cl_lens3= MQ3.lensed_cl(2500)
+
+ell_l=cl_lens0['ell']
+
 # plotting
 #################
 #
-#plt.loglog(kvec/h,np.array(pkM),'r',linestyle='-', label='$\Lambda$CDM', lw='2.5') 
-
-#plt.loglog(kvec/h, np.array(pkMQ),'b',linestyle='-',label='AS') 
-
 plt.figure(figsize=(3.3,2.5)) 
-plt.semilogx(kvec/h,  np.array(pkMQ2)/np.array(pkM),color='m',alpha=0.6,linestyle=':', label='$\lambda=8, A=0.01, B=34.80$')
-plt.semilogx(kvec/h, np.array(pkMQ3)/np.array(pkM),color='m',alpha=0.8,linestyle='--', label='$\lambda=10, A=0.008, B=27.20$')
-plt.semilogx(kvec/h, np.array(pkMQ4)/np.array(pkM),color='m',linestyle='-', label='$\lambda=12, A=0.004, B=22.66$')
+#plt.loglog(kvec/h, np.array(pkMQ),'b',linestyle='-',label='AS') 
+#plt.plot(ell_l,(cl_lens3['tt']-cl_lens0['tt'])/cl_lens0['tt'],  color='m', linestyle='-',label='$\psi$')
+plt.plot(ell_l,(cl_lensQ['tt']-cl_lens0['tt'])/cl_lens0['tt'],  color='b',alpha=0.6, linestyle='--',label='$\\beta=0$')
+plt.plot(ell_l,(cl_lens1['tt']-cl_lens0['tt'])/cl_lens0['tt'],  color='lightseagreen',alpha=0.6, linestyle='-.',label='$\\beta=10^{-6}$')
+plt.plot(ell_l,(cl_lens2['tt']-cl_lens0['tt'])/cl_lens0['tt'],  color='lightseagreen',linestyle=':',label='$\\beta=5\\times10^{-6}$')
 
-plt.rcParams["figure.autolayout"] = True
-
-#
 #plt.legend(title='Albrecht Skordis')
-plt.xlim([0.00012,3])
+plt.xlim([1.5,2560])
+#plt.ylim([-0.017,0.017 ])
 plt.legend()
-plt.ylim([0.717,1.08])
-plt.xlabel(r'$k \,\,\,\, [h/\mathrm{Mpc}]$', labelpad = 1)
-plt.ylabel(r'$P^{\rm AS}/P_{\Lambda\rm CDM}$')
+
+plt.xlabel(r'$\ell$')
+plt.ylabel(r'$\Delta C_{\ell}/C_{\ell}^{\Lambda \rm CDM}$')
 #plt.tick_params(which='minor',axis='both',direction='in',right=True,top=True)
 #plt.tick_params(which='major',axis='both',direction='in',right=True,top=True)
 
-plt.savefig('scripts/Plots/AS_MPS_ratiowhat.pdf', bbox_inches='tight', pad_inches=0.04)
+plt.savefig('scripts_int/Plots/TT_AS_DM_beta1.pdf', bbox_inches='tight', pad_inches=0.04)
     
 

@@ -5,9 +5,6 @@ from classy import Class
 from scipy.optimize import fsolve
 from scipy.interpolate import interp1d
 import math
-import scienceplots
-
-plt.style.use(['science','ieee'])
 
 k_out = [0.1] # 1/Mpc
 #
@@ -21,7 +18,6 @@ common_settings = {# we need to set the output field to something although
                    # value of k we want to polot in [1/Mpc]
                    'k_output_values': str(k_out).strip('[]'),
                    # LambdaCDM parameters
-                   'a_ini_over_a_today_default': 1.e-15,
                    'h':0.6732117,
                    'omega_b':0.02238280,
                    'omega_cdm':0.1201075,
@@ -68,28 +64,25 @@ backgroundQ3= {}
     #
 M = Class()
 M.set(common_settings)
-
-
 MQ=Class()
 MQ.set(common_settings)
-MQ.set({'Omega_Lambda':1e-7,'Omega_scf':-0.1,'Omega_fld':0.,'attractor_ic_scf': 'no',
-                   'scf_parameters': '9, 2.0, 0.01, 30.2203, 19, 0.0',
+MQ.set({'Omega_Lambda':0,'Omega_scf':-0.1,'Omega_fld':0.,'Omega_Lambda':0,'attractor_ic_scf': 'no',
+                   'scf_parameters': '1, 2.0, 0.01, 34.8, 2.2, 0.0',
                    'scf_tuning_index':0,})
-
 MQ2=Class()
 MQ2.set(common_settings)
 MQ2.set({'Omega_Lambda':1e-5,'Omega_scf':-0.1,'Omega_fld':0.,'attractor_ic_scf': 'no',
-                   'scf_parameters': '7.996, 2.0, 0.01, 34.001, 22, 0.0',
+                   'scf_parameters': '2, 2.0, 0.01, 34.8, 2.2, 0.0',
                    'scf_tuning_index':0,})
 MQ3=Class()
 MQ3.set(common_settings)
 MQ3.set({'Omega_Lambda':1e-5,'Omega_scf':-0.1,'Omega_fld':0.,'attractor_ic_scf': 'no',
-                   'scf_parameters': '9.99, 2.0, 0.008,27.1872, 17.2, 0.0',
+                   'scf_parameters': '4, 2.0, 0.01, 34.8, 2.2, 0.0',
                    'scf_tuning_index':0,})
 MQ4=Class()
 MQ4.set(common_settings)
 MQ4.set({'Omega_Lambda':1e-5,'Omega_scf':-0.1,'Omega_fld':0.,'attractor_ic_scf': 'no',
-                   'scf_parameters': '11.96, 2.0, 0.004,22.656, 14.2, 0.0',
+                   'scf_parameters': '7, 2.0, 0.01, 34.8, 2.2, 0.0',
                    'scf_tuning_index':0,})
 
 M.compute()
@@ -134,26 +127,28 @@ baCrit = background['(.)rho_crit']
 bVQ = backgroundQ['V_scf']
 bppQ = backgroundQ["phi'_scf"]
 baCritQ = backgroundQ['(.)rho_crit']
-rho_scfQ=backgroundQ['(.)rho_scf']
+rho_scfQ= backgroundQ['(.)rho_scf']
 Omega_scfQ = rho_scfQ/baCritQ
+p_scfQ=backgroundQ['(.)p_scf']
+
 ##
 bVQ2 = backgroundQ2['V_scf']
 bppQ2 = backgroundQ2["phi'_scf"]
 baCritQ2 = backgroundQ2['(.)rho_crit']
-#rho_scfQ2 = (bppQ2*bppQ2/(2*baa*baa) + bVQ2)/3.
-#Omega_scfQ2 = rho_scfQ2/baCritQ2
+rho_scfQ2 = (bppQ2*bppQ2/(2*baa*baa) + bVQ2)/3.
+Omega_scfQ2 = rho_scfQ2/baCritQ2
 ##
 bVQ3 = backgroundQ3['V_scf']
 bppQ3 = backgroundQ3["phi'_scf"]
 baCritQ3 = backgroundQ3['(.)rho_crit']
-#rho_scfQ3 = (bppQ3*bppQ3/(2*baa*baa) + bVQ3)/3.
-#Omega_scfQ3 = rho_scfQ3/baCritQ3
+rho_scfQ3 = (bppQ3*bppQ3/(2*baa*baa) + bVQ3)/3.
+Omega_scfQ3 = rho_scfQ3/baCritQ3
 ##
 bVQ4 = backgroundQ4['V_scf']
 bppQ4 = backgroundQ4["phi'_scf"]
 baCritQ4 = backgroundQ4['(.)rho_crit']
-#rho_scfQ4 = (bppQ4*bppQ4/(2*baa*baa) + bVQ4)/3.
-#Omega_scfQ4 = rho_scfQ4/baCritQ4
+rho_scfQ4 = (bppQ4*bppQ4/(2*baa*baa) + bVQ4)/3.
+Omega_scfQ4 = rho_scfQ4/baCritQ4
 
 
 colours = ['g']
@@ -166,20 +161,20 @@ colours = ['g']
 #plt.xlim([0.0, 10.])
 #plt.ylim([0.0, 1.0])
 #plt.semilogx(1/(1+background['z']), baCC/baCritQ,color='r', label='LCDM')
-plt.semilogx(1/(1+backgroundQ4['z']),backgroundQ4['(.)rho_scf']/baCritQ4, color='m', label='$\Omega_{\psi}:\lambda=12, A=0.004, B=22.66$')
-plt.semilogx(1/(1+backgroundQ2['z']), (backgroundQ4['(.)rho_g']+backgroundQ4['(.)rho_ncdm[0]'])/baCritQ4,label='$\Omega_{g}$')
-plt.semilogx(1/(1+backgroundQ2['z']), (backgroundQ4['(.)rho_b']+backgroundQ4['(.)rho_cdm'])/baCritQ4, label='$\Omega_{m}$')
+plt.semilogx(1/(1+backgroundQ['z']), p_scfQ/rho_scfQ, color='b', label='$\Omega_{\phi}$')
+#plt.semilogx(1/(1+backgroundQ['z']), (backgroundQ['(.)rho_g']+backgroundQ['(.)rho_ncdm[0]'])/baCritQ, color='c', label='$\Omega_{g}$')
+#plt.semilogx(1/(1+backgroundQ['z']), (backgroundQ['(.)rho_b']+backgroundQ['(.)rho_cdm'])/baCritQ, color='g', label='$\Omega_{m}$')
 
-#plt.xlim([1e-7, 2])
+plt.xlim([1e-30, 2])
 #plt.ylim([0.0, 20])
 
 plt.xlabel(r"$a$")
-plt.ylabel(r"$\mathrm{\Omega}$")
+plt.ylabel(r"$w_{\phi}$")
 plt.tight_layout()
-plt.legend()
+plt.legend(title='$\lambda=8, \\alpha=2, A=0.01, B=34.8, \phi_{ini}=2.2, \dot{\phi}_{ini}=0 $')
 
 # In[ ]:
 
 
-plt.savefig('scripts/Plots/Omega_AS.pdf')
+plt.savefig('w_albrecht_lambda.pdf')
 

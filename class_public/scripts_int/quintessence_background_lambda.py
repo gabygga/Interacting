@@ -5,9 +5,6 @@ from classy import Class
 from scipy.optimize import fsolve
 from scipy.interpolate import interp1d
 import math
-import scienceplots
-
-plt.style.use(['science','ieee'])
 
 k_out = [0.1] # 1/Mpc
 #
@@ -21,7 +18,6 @@ common_settings = {# we need to set the output field to something although
                    # value of k we want to polot in [1/Mpc]
                    'k_output_values': str(k_out).strip('[]'),
                    # LambdaCDM parameters
-                   'a_ini_over_a_today_default': 1.e-15,
                    'h':0.6732117,
                    'omega_b':0.02238280,
                    'omega_cdm':0.1201075,
@@ -68,28 +64,30 @@ backgroundQ3= {}
     #
 M = Class()
 M.set(common_settings)
-
-
 MQ=Class()
 MQ.set(common_settings)
-MQ.set({'Omega_Lambda':1e-7,'Omega_scf':-0.1,'Omega_fld':0.,'attractor_ic_scf': 'no',
-                   'scf_parameters': '9, 2.0, 0.01, 30.2203, 19, 0.0',
+MQ.set({'Omega_Lambda':1e-5,'Omega_scf':-0.1,'Omega_fld':0.,'attractor_ic_scf': 'no',
+                   'scf_parameters': '8, 2.0, 0.01, 34.8, 21, 0.',
                    'scf_tuning_index':0,})
-
 MQ2=Class()
 MQ2.set(common_settings)
 MQ2.set({'Omega_Lambda':1e-5,'Omega_scf':-0.1,'Omega_fld':0.,'attractor_ic_scf': 'no',
-                   'scf_parameters': '7.996, 2.0, 0.01, 34.001, 22, 0.0',
+                   'scf_parameters': '8, 2.0, 0.01, 34.8, 23, 0.0',
                    'scf_tuning_index':0,})
 MQ3=Class()
 MQ3.set(common_settings)
 MQ3.set({'Omega_Lambda':1e-5,'Omega_scf':-0.1,'Omega_fld':0.,'attractor_ic_scf': 'no',
-                   'scf_parameters': '9.99, 2.0, 0.008,27.1872, 17.2, 0.0',
+                   'scf_parameters': '8, 2., 0.01, 34.8, 25, 0.0',
                    'scf_tuning_index':0,})
 MQ4=Class()
 MQ4.set(common_settings)
 MQ4.set({'Omega_Lambda':1e-5,'Omega_scf':-0.1,'Omega_fld':0.,'attractor_ic_scf': 'no',
-                   'scf_parameters': '11.96, 2.0, 0.004,22.656, 14.2, 0.0',
+                   'scf_parameters': '7.812, 2., 0.01, 34.8, 29, 0.0',
+                   'scf_tuning_index':0,})
+MQ5=Class()
+MQ5.set(common_settings)
+MQ5.set({'Omega_Lambda':1e-5,'Omega_scf':-0.1,'Omega_fld':0.,'attractor_ic_scf': 'no',
+                   'scf_parameters': '7.812, 2., 0.01, 34.8, 34, 0.0',
                    'scf_tuning_index':0,})
 
 M.compute()
@@ -97,6 +95,7 @@ MQ.compute()
 MQ2.compute()
 MQ3.compute()
 MQ4.compute()
+MQ5.compute()
 
     #load perturbations
 all_k=M.get_perturbations()
@@ -118,6 +117,10 @@ backgroundQ3 = MQ3.get_background()
 all_kQ4=MQ4.get_perturbations()
 one_kQ4=all_kQ4['scalar']
 backgroundQ4 = MQ4.get_background()
+  ###
+all_kQ5=MQ5.get_perturbations()
+one_kQ5=all_kQ5['scalar']
+backgroundQ5 = MQ5.get_background()
   
 
     ###
@@ -134,52 +137,73 @@ baCrit = background['(.)rho_crit']
 bVQ = backgroundQ['V_scf']
 bppQ = backgroundQ["phi'_scf"]
 baCritQ = backgroundQ['(.)rho_crit']
-rho_scfQ=backgroundQ['(.)rho_scf']
-Omega_scfQ = rho_scfQ/baCritQ
+rho_scfQ =backgroundQ['(.)rho_scf']
+p_scfQ = backgroundQ['(.)p_scf']
+prho_scfQ = backgroundQ['(.)rho_scf']
+phi_scfQ = backgroundQ['phi_scf']
+
+#Omega_scfQ = rho_scfQ/baCritQ
 ##
 bVQ2 = backgroundQ2['V_scf']
 bppQ2 = backgroundQ2["phi'_scf"]
 baCritQ2 = backgroundQ2['(.)rho_crit']
-#rho_scfQ2 = (bppQ2*bppQ2/(2*baa*baa) + bVQ2)/3.
-#Omega_scfQ2 = rho_scfQ2/baCritQ2
+rho_scfQ2 = backgroundQ2['(.)rho_scf']
+p_scfQ2 = backgroundQ2['(.)p_scf']
+Omega_scfQ2 = rho_scfQ2/baCritQ2
+phi_scfQ2 = backgroundQ2['phi_scf']
+
 ##
 bVQ3 = backgroundQ3['V_scf']
 bppQ3 = backgroundQ3["phi'_scf"]
 baCritQ3 = backgroundQ3['(.)rho_crit']
-#rho_scfQ3 = (bppQ3*bppQ3/(2*baa*baa) + bVQ3)/3.
-#Omega_scfQ3 = rho_scfQ3/baCritQ3
+rho_scfQ3 = backgroundQ3['(.)rho_scf'] 
+Omega_scfQ3 = rho_scfQ3/baCritQ3
+phi_scfQ3 = backgroundQ3['phi_scf']
+p_scfQ3 = backgroundQ3['(.)p_scf'] 
+
 ##
 bVQ4 = backgroundQ4['V_scf']
 bppQ4 = backgroundQ4["phi'_scf"]
 baCritQ4 = backgroundQ4['(.)rho_crit']
-#rho_scfQ4 = (bppQ4*bppQ4/(2*baa*baa) + bVQ4)/3.
-#Omega_scfQ4 = rho_scfQ4/baCritQ4
+rho_scfQ4 =backgroundQ4['(.)rho_scf']
+p_scfQ4 =backgroundQ4['(.)p_scf']
+phi_scfQ4 = backgroundQ4['phi_scf']
+
+Omega_scfQ4 = rho_scfQ4/baCritQ4
+##
+bVQ5 = backgroundQ5['V_scf']
+bppQ5 = backgroundQ5["phi'_scf"]
+baCritQ5 = backgroundQ5['(.)rho_crit']
+rho_scfQ5 =backgroundQ5['(.)rho_scf']
+p_scfQ5 =backgroundQ5['(.)p_scf']
+Omega_scfQ5 = rho_scfQ5/baCritQ5
+phi_scfQ5 = backgroundQ5['phi_scf']
 
 
-colours = ['g']
-#for name in namelist:
-#    idx = namelist.index(name)
-#    plt.loglog(baLCDM['a'],fLCDM*baLCDM[name],colours[idx]+'-')
-#plt.legend(namelist,loc='upper left')
-#for name in namelist:
-#    idx = namelist.index(name)
-#plt.xlim([0.0, 10.])
-#plt.ylim([0.0, 1.0])
-#plt.semilogx(1/(1+background['z']), baCC/baCritQ,color='r', label='LCDM')
-plt.semilogx(1/(1+backgroundQ4['z']),backgroundQ4['(.)rho_scf']/baCritQ4, color='m', label='$\Omega_{\psi}:\lambda=12, A=0.004, B=22.66$')
-plt.semilogx(1/(1+backgroundQ2['z']), (backgroundQ4['(.)rho_g']+backgroundQ4['(.)rho_ncdm[0]'])/baCritQ4,label='$\Omega_{g}$')
-plt.semilogx(1/(1+backgroundQ2['z']), (backgroundQ4['(.)rho_b']+backgroundQ4['(.)rho_cdm'])/baCritQ4, label='$\Omega_{m}$')
+#plt.plot(1/(1+background['z']), baCC/baCritQ,color='r', label='LCDM')
+#plt.semilogx(1/(1+backgroundQ['z']),rho_scfQ/baCritQ, color='#4fa8fb',linewidth='2', label='$\Phi_{i}=21$')
+#plt.plot(1/(1+backgroundQ2['z']),rho_scfQ2/baCritQ2,color='#ff35c2', linestyle='-', linewidth='2',label='$\Phi_{i}=23$')
+#plt.plot(1/(1+backgroundQ3['z']),rho_scfQ3/baCritQ3,color='c', label='$\Phi_{i}=25$')
+#plt.plot(1/(1+backgroundQ4['z']),rho_scfQ4/baCritQ4,color='m', linestyle='-', linewidth='2',label='$\Phi_{i}=29$')
+#plt.plot(1/(1+backgroundQ4['z']),rho_scfQ5/baCritQ5,color='g', linestyle='-', linewidth='2',label='$\Phi_{i}=34$')
 
-#plt.xlim([1e-7, 2])
+plt.semilogx(1/(1+backgroundQ['z']),p_scfQ/rho_scfQ, color='#4fa8fb',linewidth='2', label='$\Phi_{i}=21$')
+plt.plot(1/(1+backgroundQ2['z']),p_scfQ2/rho_scfQ2,color='#ff35c2', linestyle='-', linewidth='2',label='$\Phi_{i}=23$')
+plt.plot(1/(1+backgroundQ3['z']),p_scfQ3/rho_scfQ3,color='c', label='$\Phi_{i}=25$')
+plt.plot(1/(1+backgroundQ4['z']),p_scfQ4/rho_scfQ4,color='m', linestyle='-', linewidth='2',label='$\Phi_{i}=29$')
+plt.plot(1/(1+backgroundQ5['z']),p_scfQ5/rho_scfQ5,color='g', linestyle='-', linewidth='2',label='$\Phi_{i}=34$')
+
+plt.xlim([1e-14, 1.1])
 #plt.ylim([0.0, 20])
 
 plt.xlabel(r"$a$")
-plt.ylabel(r"$\mathrm{\Omega}$")
+plt.ylabel(r"$\mathrm{w_{scf}}$")
 plt.tight_layout()
-plt.legend()
+plt.legend(title='$V(\phi)=[(\phi-B)^{2} + A]{\\rm e} ^{-\lambda \phi }$')
 
 # In[ ]:
 
 
-plt.savefig('scripts/Plots/Omega_AS.pdf')
+plt.savefig('scripts/Plots/w_scf_Phii.pdf')
+
 

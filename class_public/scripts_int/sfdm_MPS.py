@@ -74,20 +74,20 @@ M.set(common_settings)
 MQ=Class()
 MQ.set(common_settings)
 MQ.set({'a_ini_over_a_today_default':1.e-14, 'Omega_cdm':0.0001,'Omega_sfdm_1':0.264,'Omega_sfdm_2':0.0,'attractor_ic_sfdm_1': 'yes',
-                   'sfdm_parameters_1': '-24., 0.0, 1.e-2, 1.e-16, 1.e-30',
+                   'sfdm_parameters_1': '-22., 1.e4, 1.e-2, 1.e-16, 1.e-30',
                    'sfdm_tuning_index_1':2})
 
 ##
 MQ1=Class()
 MQ1.set(common_settings)
 MQ1.set({'a_ini_over_a_today_default':1.e-14, 'Omega_cdm':0.0001,'Omega_sfdm_1':0.264,'Omega_sfdm_2':0.0,'attractor_ic_sfdm_1': 'yes',
-                   'sfdm_parameters_1': '-22., 1.e4, 1.e-2, 1.e-16, 1.e-30',
+                   'sfdm_parameters_1': '-22., 1.e2, 1.e-2, 1.e-16, 1.e-30',
                    'sfdm_tuning_index_1':2})
 
 MQ2=Class()
 MQ2.set(common_settings)
 MQ2.set({'a_ini_over_a_today_default':1.e-14, 'Omega_cdm':0.0001,'Omega_sfdm_1':0.264,'Omega_sfdm_2':0.0,'attractor_ic_sfdm_1': 'yes',
-                   'sfdm_parameters_1': '-24., -1.e4, 1.e-2, 1.e-16, 1.e-30',
+                   'sfdm_parameters_1': '-24., 1.e4, 1.e-2, 1.e-16, 1.e-30',
                    'sfdm_tuning_index_1':2,})
 MQ3=Class()
 MQ3.set(common_settings)
@@ -106,7 +106,6 @@ MQ1.compute()
 MQ2.compute()
 MQ3.compute()
 MQ4.compute()
-
     #load perturbations
 all_k=M.get_perturbations()
 one_k=all_k['scalar']
@@ -116,10 +115,6 @@ all_kQ=MQ.get_perturbations()
 one_kQ=all_kQ['scalar']
 backgroundQ = MQ.get_background()
  ###
-all_kQ1=MQ1.get_perturbations()
-one_kQ1=all_kQ1['scalar']
-backgroundQ1 = MQ1.get_background()
-##
 all_kQ2=MQ2.get_perturbations()
 one_kQ2=all_kQ2['scalar']
 backgroundQ2 = MQ2.get_background()
@@ -131,60 +126,40 @@ backgroundQ3 = MQ3.get_background()
 all_kQ4=MQ4.get_perturbations()
 one_kQ4=all_kQ4['scalar']
 backgroundQ4 = MQ4.get_background()
-  
+     ###
 
-    ###
-#  print(background.keys())
-#rho_scf=background['rho_scf'] 
+#Defining an array of k-values
+kvec = np.logspace(-4,np.log10(3),1000)
+
+pkM   = []
+pkMQ  = []
+pkMQ1 = []
+pkMQ2 = []
+
+for k in kvec:
+    pkM.append(M.pk(k,0.))
+    pkMQ.append(MQ.pk(k,0.))
+    pkMQ1.append(MQ1.pk(k,0.))
+    pkMQ2.append(MQ2.pk(k,0.))
+    h = M.h()
+# plotting
 #################
 #
-baH = background['H [1/Mpc]']
-baT = background['conf. time [Mpc]']
-baa = 1/(1 + background['z'])
-baCC= background['(.)rho_lambda']
-baCrit = background['(.)rho_crit']
-##
-baCritQ = backgroundQ['(.)rho_crit']
-rho_sfdmQ=backgroundQ['(.)rho_sfdm_1']
-p_sfdmQ=backgroundQ['(.)p_sfdm_1']
-rho_gQ =backgroundQ['(.)rho_g']
-rho_lambdaQ=backgroundQ['(.)rho_lambda']
-rho_bQ =backgroundQ['(.)rho_b']
-##
-baCritQ1 = backgroundQ1['(.)rho_crit']
+
+plt.plot(kvec/h, np.array(pkMQ)/np.array(pkM),'c', alpha=0.5, linestyle=':',label='$m_{\phi}=10^{-22}\\rm{eV},\, \lambda=10^5$')
+
+plt.plot(kvec/h, np.array(pkMQ1)/np.array(pkM),'c',alpha=0.7,linestyle='--',label='$m_{\phi}=10^{-24}\\rm{eV},\,\lambda=10^2$')
+
+plt.plot(kvec/h, np.array(pkMQ2)/np.array(pkM),'c' ,linestyle='-', label='$m_{\phi}=10^{-24}\\rm{eV}, \,\lambda=10^4$')
 
 #
-baCritQ2 = backgroundQ2['(.)rho_crit']
-rho_sfdmQ2=backgroundQ2['(.)rho_sfdm_1']
-p_sfdmQ2=backgroundQ2['(.)p_sfdm_1']
-
-#plt.semilogx(1/(1+backgroundQ2['z']), (backgroundQ2['(.)rho_sfdm_1']+backgroundQ2['(.)rho_b'])/baCritQ2,linestyle='-', label='$\lambda=-1e4$')
-#plt.semilogx(1/(1+backgroundQ2['z']), (backgroundQ2['(.)rho_lambda']+backgroundQ2['(.)rho_g'])/baCritQ2, linestyle='-.', label='$\Omega_{\lambda}$')
-
-#plt.semilogx(1/(1+backgroundQ['z']), (backgroundQ['(.)rho_g']+backgroundQ['(.)rho_ncdm[0]'])/baCritQ, color='m',linestyle=':', label='$\Omega_{g}$, $m_{\phi}=1e-20$')
-#plt.semilogx(1/(1+backgroundQ['z']), (backgroundQ['(.)rho_b']+backgroundQ['(.)rho_cdm'])/baCritQ, color='m',linestyle='--', label='$\Omega_{m}$')
-#plt.semilogx(1/(1+backgroundQ['z']), (backgroundQ['(.)rho_sfdm_1']+backgroundQ['(.)rho_b'])/baCritQ, color='m',linestyle='-', label='$\lambda=0$')
-#plt.semilogx(1/(1+backgroundQ['z']), (backgroundQ['(.)rho_lambda']+backgroundQ['(.)rho_g'])/baCritQ, linestyle='--', label='$\Omega_{\lambda}$')
-#
-#
-plt.semilogx(1/(1+backgroundQ1['z']), (backgroundQ1['(.)rho_lambda'])/baCritQ1, linestyle='-.',c='orchid', label='$\Omega_{\Lambda}$')
-plt.semilogx(1/(1+backgroundQ1['z']), (backgroundQ1['(.)rho_g']+backgroundQ1['(.)rho_ncdm[0]'])/baCritQ1,  color='#0e0e44', linestyle=':', label='$\Omega_{g}$')
-plt.semilogx(1/(1+backgroundQ1['z']), (backgroundQ1['(.)rho_b']+backgroundQ1['(.)rho_sfdm_1'])/baCritQ1, color='aqua',linestyle='-', label='$\Omega_{m}$')
-#plt.semilogx(1/(1+backgroundQ1['z']), (backgroundQ1['(.)rho_sfdm_1']+backgroundQ1['(.)rho_b'])/baCritQ1, color='c',linestyle='-', label='$\lambda=1e4$')
-#
-#plt.semilogx(1/(1+backgroundQ2['z']), (backgroundQ2['(.)rho_g']+backgroundQ2['(.)rho_ncdm[0]'])/baCritQ2, color='c',linestyle=':', label='$\Omega_{g}$, $m_{\phi}=1e-24$')
-#plt.semilogx(1/(1+backgroundQ2['z']), (backgroundQ2['(.)rho_b']+backgroundQ2['(.)rho_cdm'])/baCritQ2, color='c',linestyle='--', label='$\Omega_{m}$')
-#
-plt.xlim([1e-7, 1])
-#plt.ylim([0.0, 20])
-
-plt.xlabel(r"$a$")
-plt.ylabel(r"$\mathrm{\Omega}$")
-plt.tight_layout()
+#plt.legend(title='Albrecht Skordis')
+plt.xscale('log')
 plt.legend()
+#plt.ylim([2e-7,2e5])
+plt.xlim([0.00012,3])
+plt.xlabel(r'$k \,\,\,\, [h/\mathrm{Mpc}]$')
+plt.ylabel(r'$P^{\rm sfdm}/P_{\Lambda\rm CDM}$')
 
-# In[ ]:
-
-
-plt.savefig('scripts/Plots/Omega_trig_c.pdf')
-
+plt.savefig('scripts/Plots/MPS_sfdm.pdf')
+    
