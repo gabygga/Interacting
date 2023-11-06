@@ -352,7 +352,10 @@ int background_functions(
     rho_m += pvecback[pba->index_bg_rho_scf] - 3.* pvecback[pba->index_bg_p_scf]; //the rest contributes matter
     //printf(" a= %e, Omega_scf = %f, \n ",a_rel, pvecback[pba->index_bg_rho_scf]/rho_tot );
   }
- 
+  /*Modification interacting scalar fields*/
+  if (pba->has_int_scf == _TRUE_){
+  /*printf("Just trying int_scf");*/
+  }
 
   /* ncdm */
   if (pba->has_ncdm == _TRUE_) {
@@ -850,7 +853,7 @@ int background_indices(
   pba->has_sfdm_1 = _FALSE_;
   pba->has_sfdm_2 = _FALSE_;
   pba->has_scf = _FALSE_;
-  /*pba->has_sf_int = _FALSE_;*/
+  pba->has_int_scf = _FALSE_; /*Modification*/
   pba->has_lambda = _FALSE_;
   pba->has_fld = _FALSE_;
   pba->has_ur = _FALSE_;
@@ -887,8 +890,8 @@ int background_indices(
   if (pba->Omega0_ur != 0.)
     pba->has_ur = _TRUE_;
     
- /* if (pba->beta != 0.)
-    pba->has_sf_int = _TRUE_;*/
+  if (pba->beta != 0.)
+    pba->has_int_scf = _TRUE_;/*Modification*/
     
   if (pba->sgnK != 0)
     pba->has_curvature = _TRUE_;

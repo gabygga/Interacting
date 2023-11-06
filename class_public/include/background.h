@@ -324,6 +324,7 @@ struct background
   short has_sfdm_1;       /**< presence of scalar field dark matter 1? */
   short has_sfdm_2;       /**< presence of scalar field dark matter 2? */
   short has_scf;       /**< presence of a scalar field? */
+  short has_int_scf;       /**<Modification interacting*/
   short has_ncdm;      /**< presence of non-cold dark matter? */
   short has_lambda;    /**< presence of cosmological constant? */
   short has_fld;       /**< presence of fluid with constant w and cs2? */
