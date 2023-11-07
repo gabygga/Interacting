@@ -6613,7 +6613,7 @@ int perturb_sources(
 /*Modification delta_int */
     if (ppt->has_source_delta_int == _TRUE_) {
        if (ppt->gauge == synchronous){
-    _set_source_(ppt->index_tp_delta_int) = 0.1; /* pba->beta*a_prime_over_a/sqrt(8*_PI_*_G_)*(ppw->pvecback[pba->index_bg_phi_prime_scf]*sqrt(3/2)*exp(0.5*y[pba->index_bi_alpha_sfdm_1])*(y[ppw->pv->index_pt_delta1_sfdm_1]*cos_sfdm(pba,0.5*ppw->pvecback[pba->index_bg_theta_sfdm_1])+y[ppw->pv->index_pt_delta_sfdm_1]*sin_sfdm(pba, 0.5*ppw->pvecback[pba->index_bg_theta_sfdm_1]))+exp(-0.5*y[pba->index_bi_alpha_sfdm_1])*(sqrt(2./3.)*sin_sfdm(pba, 0.5*ppw->pvecback[pba->index_bg_theta_sfdm_1])*ppw->pv->index_pt_phi_prime_scf));*/
+    _set_source_(ppt->index_tp_delta_int) = pba->beta*a_prime_over_a/sqrt(8*_PI_*_G_)*(ppw->pvecback[pba->index_bg_phi_prime_scf]*sqrt(3/2)*exp(0.5*y[pba->index_bi_alpha_sfdm_1])*(y[ppw->pv->index_pt_delta1_sfdm_1]*cos_sfdm(pba,0.5*ppw->pvecback[pba->index_bg_theta_sfdm_1])+y[ppw->pv->index_pt_delta_sfdm_1]*sin_sfdm(pba, 0.5*ppw->pvecback[pba->index_bg_theta_sfdm_1]))+exp(-0.5*y[pba->index_bi_alpha_sfdm_1])*(sqrt(2./3.)*sin_sfdm(pba, 0.5*ppw->pvecback[pba->index_bg_theta_sfdm_1])*ppw->pv->index_pt_phi_prime_scf));
    }
     }
   /** - for tensors */
@@ -6961,9 +6961,9 @@ int perturb_print_variables(double tau,
       theta_scf = rho_plus_p_theta_scf/(pvecback[pba->index_bg_rho_scf]+pvecback[pba->index_bg_p_scf]);
 
     }
-    if (ppt->has_source_delta_int == _TRUE_) {
+    if (pba->has_int_scf == _TRUE_) {
        if (ppt->gauge == synchronous){
-          delta_int = 0.1;
+          delta_int = (pba->beta)/sqrt(8*_PI_*_G_)*pvecback[pba->index_bg_H]*pvecback[pba->index_bg_a]*(ppw->pvecback[pba->index_bg_phi_prime_scf]*sqrt(3/2)*exp(0.5*y[pba->index_bi_alpha_sfdm_1])*(y[ppw->pv->index_pt_delta1_sfdm_1]*cos_sfdm(pba,0.5*ppw->pvecback[pba->index_bg_theta_sfdm_1])+y[ppw->pv->index_pt_delta_sfdm_1]*sin_sfdm(pba, 0.5*ppw->pvecback[pba->index_bg_theta_sfdm_1]))+exp(-0.5*y[pba->index_bi_alpha_sfdm_1])*(sqrt(2./3.)*sin_sfdm(pba, 0.5*pvecback[pba->index_bg_theta_sfdm_1])*y[ppw->pv->index_pt_phi_prime_scf]));
        }
     }
 
