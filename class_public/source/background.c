@@ -1936,6 +1936,7 @@ int background_solve(
         printf("    -> wished = %1.2e [eV]\n", pow(10.,pba->sfdm_parameters_2[0]));
         }
 ////////////////////////////////////////////////////////////////
+
     if(pba->has_lambda == _TRUE_)
       printf("Lambda details:\n");
       printf(" -> Omega_Lambda = %g, wished %g\n",
@@ -1945,6 +1946,7 @@ int background_solve(
       printf("Scalar field details:\n");
       printf("     -> Omega_scf = %g, wished %g\n",
              pvecback[pba->index_bg_rho_scf]/pvecback[pba->index_bg_rho_crit], pba->Omega0_scf);
+      
              
       if(pba->has_lambda == _TRUE_)
 	printf("     -> Omega_Lambda = %g, wished %g\n",
@@ -1954,7 +1956,13 @@ int background_solve(
       for (i=0; i<pba->scf_parameters_size-1; i++){
         printf("%.3f, ",pba->scf_parameters[i]);
       }
+    double scf_lambda;
+    double scf_B;
+    double scf_A;
+      scf_B=-log((3*pow(pba->H0,2)/pow(_c_,2)*pow(scf_lambda,2)*pba->Omega0_scf)/(scf_A*pow(scf_lambda,2)+pow(1-sqrt(1-pow(scf_lambda*scf_A,2)),2)))/scf_lambda+(1-sqrt(1-pow(scf_lambda*scf_A,2)))/scf_lambda;
       printf("%.3f]\n",pba->scf_parameters[pba->scf_parameters_size-1]);
+      printf("Expresion=%g, Input=%g\n",
+      scf_B, pba->scf_parameters[3]);
     }
   }
 
@@ -1993,9 +2001,11 @@ int background_initial_conditions(
   double f,Omega_rad, rho_rad;
   int counter,is_early_enough,n_ncdm;
   double scf_lambda;
+  double scf_B;
+  double scf_A;
   double rho_fld_today;
   double w_fld,dw_over_da_fld,integral_fld;
-
+  
   /** - fix initial value of \f$ a \f$ */
   a = ppr->a_ini_over_a_today_default * pba->a_today;
 
@@ -2137,6 +2147,8 @@ int background_initial_conditions(
    */
   if(pba->has_scf == _TRUE_){
     scf_lambda = pba->scf_parameters[0];
+    scf_A=pba->scf_parameters[2];
+    scf_B= -log((3*pow(pba->H0,2)/pow(_c_,2)*pow(scf_lambda,2)*pba->Omega0_scf)/(scf_A*pow(scf_lambda,2)+pow(1-sqrt(1-pow(scf_lambda*scf_A,2)),2)))/scf_lambda+(1-sqrt(1-pow(scf_lambda*scf_A,2)))/scf_lambda;
     if(pba->attractor_ic_scf == _TRUE_){
       pvecback_integration[pba->index_bi_phi_scf] = -1/scf_lambda*
         log(rho_rad*4./(3*pow(scf_lambda,2)-12))*pba->phi_ini_scf;
@@ -2608,10 +2620,10 @@ double ddV_e_scf(struct background *pba,
 double V_p_scf(
                struct background *pba,
                double phi) {
-  //  double scf_lambda = pba->scf_parameters[0];
+  double scf_lambda = pba->scf_parameters[0];
   double scf_alpha  = pba->scf_parameters[1];
   double scf_A      = pba->scf_parameters[2];
-  double scf_B      = pba->scf_parameters[3];
+  double scf_B      = -log((3*pow(pba->H0,2)/pow(_c_,2)*pow(scf_lambda,2)*pba->Omega0_scf)/(scf_A*pow(scf_lambda,2)+pow(1-sqrt(1-pow(scf_lambda*scf_A,2)),2)))/scf_lambda+(1-sqrt(1-pow(scf_lambda*scf_A,2)))/scf_lambda;
 
   return  pow(phi - scf_B,  scf_alpha) +  scf_A;
 }
@@ -2620,10 +2632,10 @@ double dV_p_scf(
                 struct background *pba,
                 double phi) {
 
-  //  double scf_lambda = pba->scf_parameters[0];
+  double scf_lambda = pba->scf_parameters[0];
   double scf_alpha  = pba->scf_parameters[1];
-  //  double scf_A      = pba->scf_parameters[2];
-  double scf_B      = pba->scf_parameters[3];
+  double scf_A      = pba->scf_parameters[2];
+  double scf_B      = -log((3*pow(pba->H0,2)/pow(_c_,2)*pow(scf_lambda,2)*pba->Omega0_scf)/(scf_A*pow(scf_lambda,2)+pow(1-sqrt(1-pow(scf_lambda*scf_A,2)),2)))/scf_lambda+(1-sqrt(1-pow(scf_lambda*scf_A,2)))/scf_lambda;
 
   return   scf_alpha*pow(phi -  scf_B,  scf_alpha - 1);
 }
@@ -2631,10 +2643,10 @@ double dV_p_scf(
 double ddV_p_scf(
                  struct background *pba,
                  double phi) {
-  //  double scf_lambda = pba->scf_parameters[0];
+  double scf_lambda = pba->scf_parameters[0];
   double scf_alpha  = pba->scf_parameters[1];
-  //  double scf_A      = pba->scf_parameters[2];
-  double scf_B      = pba->scf_parameters[3];
+  double scf_A      = pba->scf_parameters[2];
+  double scf_B      = -log((3*pow(pba->H0,2)/pow(_c_,2)*pow(scf_lambda,2)*pba->Omega0_scf)/(scf_A*pow(scf_lambda,2)+pow(1-sqrt(1-pow(scf_lambda*scf_A,2)),2)))/scf_lambda+(1-sqrt(1-pow(scf_lambda*scf_A,2)))/scf_lambda;
 
   return  scf_alpha*(scf_alpha - 1.)*pow(phi -  scf_B,  scf_alpha - 2);
 }
