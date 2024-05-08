@@ -1959,7 +1959,7 @@ int background_solve(
     double scf_lambda;
     double scf_B;
     double scf_A;
-      scf_B=-log((3*pow(pba->H0,2)/pow(_c_,2)*pow(scf_lambda,2)*pba->Omega0_scf)/(scf_A*pow(scf_lambda,2)+pow(1-sqrt(1-pow(scf_lambda*scf_A,2)),2)))/scf_lambda+(1-sqrt(1-pow(scf_lambda*scf_A,2)))/scf_lambda;
+      /*scf_B=-log((3*pow(pba->H0,2)/pow(_c_,2)*pow(scf_lambda,2)*pba->Omega0_scf)/(scf_A*pow(scf_lambda,2)+pow(1-sqrt(1-pow(scf_lambda*scf_A,2)),2)))/scf_lambda+(1-sqrt(1-pow(scf_lambda*scf_A,2)))/scf_lambda;*/
       printf("%.3f]\n",pba->scf_parameters[pba->scf_parameters_size-1]);
       printf("Expresion=%g, Input=%g\n",
       scf_B, pba->scf_parameters[3]);
@@ -2148,7 +2148,8 @@ int background_initial_conditions(
   if(pba->has_scf == _TRUE_){
     scf_lambda = pba->scf_parameters[0];
     scf_A=pba->scf_parameters[2];
-    scf_B= -log((3*pow(pba->H0,2)/pow(_c_,2)*pow(scf_lambda,2)*pba->Omega0_scf)/(scf_A*pow(scf_lambda,2)+pow(1-sqrt(1-pow(scf_lambda*scf_A,2)),2)))/scf_lambda+(1-sqrt(1-pow(scf_lambda*scf_A,2)))/scf_lambda;
+    scf_B= -log((3*pow(pba->H0,2)*pow(scf_lambda,2)*pba->Omega0_scf)/(scf_A*pow(scf_lambda,2)+pow(1-sqrt(1-pow(scf_lambda*scf_A,2)),2)))/scf_lambda+(1-sqrt(1-pow(scf_lambda*scf_A,2)))/scf_lambda;
+    /**-log((3*pow(pba->H0,2)/pow(_c_,2)*pow(scf_lambda,2)*pba->Omega0_scf)/(scf_A*pow(scf_lambda,2)+pow(1-sqrt(1-pow(scf_lambda*scf_A,2)),2)))/scf_lambda+(1-sqrt(1-pow(scf_lambda*scf_A,2)))/scf_lambda;*/
     if(pba->attractor_ic_scf == _TRUE_){
       pvecback_integration[pba->index_bi_phi_scf] = -1/scf_lambda*
         log(rho_rad*4./(3*pow(scf_lambda,2)-12))*pba->phi_ini_scf;
@@ -2623,8 +2624,7 @@ double V_p_scf(
   double scf_lambda = pba->scf_parameters[0];
   double scf_alpha  = pba->scf_parameters[1];
   double scf_A      = pba->scf_parameters[2];
-  double scf_B      = -log((3*pow(pba->H0,2)/pow(_c_,2)*pow(scf_lambda,2)*pba->Omega0_scf)/(scf_A*pow(scf_lambda,2)+pow(1-sqrt(1-pow(scf_lambda*scf_A,2)),2)))/scf_lambda+(1-sqrt(1-pow(scf_lambda*scf_A,2)))/scf_lambda;
-
+  double scf_B      = -log((3*pow(pba->H0,2)*pba->Omega0_scf)/(1.45161*1.e113))/scf_lambda -(1-sqrt(1-pow(scf_lambda,2)*scf_A))/scf_lambda + log(pow((1-sqrt(1-pow(scf_lambda,2)*scf_A)/scf_lambda),2)+scf_A)/scf_lambda;
   return  pow(phi - scf_B,  scf_alpha) +  scf_A;
 }
 
@@ -2635,7 +2635,7 @@ double dV_p_scf(
   double scf_lambda = pba->scf_parameters[0];
   double scf_alpha  = pba->scf_parameters[1];
   double scf_A      = pba->scf_parameters[2];
-  double scf_B      = -log((3*pow(pba->H0,2)/pow(_c_,2)*pow(scf_lambda,2)*pba->Omega0_scf)/(scf_A*pow(scf_lambda,2)+pow(1-sqrt(1-pow(scf_lambda*scf_A,2)),2)))/scf_lambda+(1-sqrt(1-pow(scf_lambda*scf_A,2)))/scf_lambda;
+  double scf_B      = -log((3*pow(pba->H0,2)*pba->Omega0_scf/(1.45161*1.e113)))/scf_lambda -(1-sqrt(1-pow(scf_lambda,2)*scf_A))/scf_lambda + log(pow((1-sqrt(1-pow(scf_lambda,2)*scf_A)/scf_lambda),2)+scf_A)/scf_lambda;
 
   return   scf_alpha*pow(phi -  scf_B,  scf_alpha - 1);
 }
@@ -2646,8 +2646,7 @@ double ddV_p_scf(
   double scf_lambda = pba->scf_parameters[0];
   double scf_alpha  = pba->scf_parameters[1];
   double scf_A      = pba->scf_parameters[2];
-  double scf_B      = -log((3*pow(pba->H0,2)/pow(_c_,2)*pow(scf_lambda,2)*pba->Omega0_scf)/(scf_A*pow(scf_lambda,2)+pow(1-sqrt(1-pow(scf_lambda*scf_A,2)),2)))/scf_lambda+(1-sqrt(1-pow(scf_lambda*scf_A,2)))/scf_lambda;
-
+  double scf_B      = -log(3*pow(pba->H0,2)*pba->Omega0_scf/(1.45161*1.e113))/scf_lambda -(1-sqrt(1-pow(scf_lambda,2)*scf_A))/scf_lambda + log(pow((1-sqrt(1-pow(scf_lambda,2)*scf_A)/scf_lambda),2)+scf_A)/scf_lambda;
   return  scf_alpha*(scf_alpha - 1.)*pow(phi -  scf_B,  scf_alpha - 2);
 }
 
