@@ -223,7 +223,10 @@ int background_tau_of_z(
 
   return _SUCCESS_;
 }
-
+/**Modification: Adding scf potentials*/
+double V_scf_generic(struct background *pba, double phi);
+double dV_scf_generic(struct background *pba, double phi);
+double ddV_scf_generic(struct background *pba, double phi);
 /**
  * Background quantities at given \f$ a \f$.
  *
@@ -340,11 +343,19 @@ int background_functions(
     phi_prime = pvecback_B[pba->index_bi_phi_prime_scf];
     pvecback[pba->index_bg_phi_scf] = phi; // value of the scalar field phi
     pvecback[pba->index_bg_phi_prime_scf] = phi_prime; // value of the scalar field phi derivative wrt conformal time
-    pvecback[pba->index_bg_V_scf] = V_scf(pba,phi); //V_scf(pba,phi); //write here potential as function of phi
-    pvecback[pba->index_bg_dV_scf] = dV_scf(pba,phi); // dV_scf(pba,phi); //potential' as function of phi
-    pvecback[pba->index_bg_ddV_scf] = ddV_scf(pba,phi); // ddV_scf(pba,phi); //potential'' as function of phi
-    pvecback[pba->index_bg_rho_scf] = (phi_prime*phi_prime/(2*a*a) + V_scf(pba,phi))/3.; // energy of the scalar field. The field units are set automatically by setting the initial conditions
-    pvecback[pba->index_bg_p_scf] =(phi_prime*phi_prime/(2*a*a) - V_scf(pba,phi))/3.; // pressure of the scalar field
+    double V   = V_scf_generic(pba, phi);
+    double dV  = dV_scf_generic(pba, phi);
+    double ddV = ddV_scf_generic(pba, phi);
+
+    pvecback[pba->index_bg_V_scf]   = V;
+    pvecback[pba->index_bg_dV_scf]  = dV;
+    pvecback[pba->index_bg_ddV_scf] = ddV;
+
+   // pvecback[pba->index_bg_V_scf] = V_scf_generic(pba,phi); //V_scf(pba,phi); //write here potential as function of phi
+   // pvecback[pba->index_bg_dV_scf] = dV_scf_generic(pba,phi); // dV_scf(pba,phi); //potential' as function of phi
+   // pvecback[pba->index_bg_ddV_scf] = ddV_scf_generic(pba,phi); // ddV_scf(pba,phi); //potential'' as function of phi
+    pvecback[pba->index_bg_rho_scf] = (phi_prime*phi_prime/(2*a*a) + V)/3.; // energy of the scalar field. The field units are set automatically by setting the initial conditions
+    pvecback[pba->index_bg_p_scf] =(phi_prime*phi_prime/(2*a*a) - V)/3.; // pressure of the scalar field
     rho_tot += pvecback[pba->index_bg_rho_scf];
     p_tot += pvecback[pba->index_bg_p_scf];
     //divide relativistic & nonrelativistic (not very meaningful for oscillatory models)
@@ -890,7 +901,7 @@ int background_indices(
   if (pba->Omega0_ur != 0.)
     pba->has_ur = _TRUE_;
     
-  if (pba->beta != 0.)
+  if (pba->int_sf != 0.)
     pba->has_int_scf = _TRUE_;/*Modification*/
     
   if (pba->sgnK != 0)
@@ -1948,9 +1959,9 @@ int background_solve(
              pvecback[pba->index_bg_rho_scf]/pvecback[pba->index_bg_rho_crit], pba->Omega0_scf);
       
              
-      if(pba->has_lambda == _TRUE_)
+      /*if(pba->has_lambda == _TRUE_)
 	printf("     -> Omega_Lambda = %g, wished %g\n",
-               pvecback[pba->index_bg_rho_lambda]/pvecback[pba->index_bg_rho_crit], pba->Omega0_lambda);
+               pvecback[pba->index_bg_rho_lambda]/pvecback[pba->index_bg_rho_crit], pba->Omega0_lambda);*/
       printf("     -> parameters: [lambda, alpha, A, B] = \n");
       printf("                    [");
       for (i=0; i<pba->scf_parameters_size-1; i++){
@@ -1960,9 +1971,9 @@ int background_solve(
     double scf_B;
     double scf_A;
       /*scf_B=-log((3*pow(pba->H0,2)/pow(_c_,2)*pow(scf_lambda,2)*pba->Omega0_scf)/(scf_A*pow(scf_lambda,2)+pow(1-sqrt(1-pow(scf_lambda*scf_A,2)),2)))/scf_lambda+(1-sqrt(1-pow(scf_lambda*scf_A,2)))/scf_lambda;*/
-      printf("%.3f]\n",pba->scf_parameters[pba->scf_parameters_size-1]);
+      /*printf("%.3f]\n",pba->scf_parameters[pba->scf_parameters_size-1]);
       printf("Expresion=%g, Input=%g\n",
-      scf_B, pba->scf_parameters[3]);
+      scf_B, pba->scf_parameters[3]);*/
     }
   }
 
@@ -2450,10 +2461,11 @@ int background_derivs(
     
     if (pba->sfdm_parameters_1[1] >= 0.){
       dy[pba->index_bi_alpha_sfdm_1] = 3.*y[pba->index_bi_a]*pvecback[pba->index_bg_H]*
-        (pvecback[pba->index_bg_w_tot_1]+cos_sfdm(pba,y[pba->index_bi_theta_sfdm_1]))-2*pba->beta*sqrt(8*_PI_*_G_)*exp(-0.5*y[pba->index_bi_alpha_sfdm_1])*sin_sfdm(pba,0.5*y[pba->index_bi_theta_sfdm_1])*dy[pba->index_bi_phi_prime_scf]/(sqrt(6.)*pvecback[pba->index_bg_H]);/*Modification*/
+        (pvecback[pba->index_bg_w_tot_1]+cos_sfdm(pba,y[pba->index_bi_theta_sfdm_1]))
+        -2*pba->int_sf*sin_sfdm(pba,0.5*y[pba->index_bi_theta_sfdm_1])*sin_sfdm(pba,0.5*y[pba->index_bi_theta_sfdm_1])*dy[pba->index_bi_phi_prime_scf]*dy[pba->index_bi_phi_prime_scf]/(y[pba->index_bi_a]);/*Modification*/
       dy[pba->index_bi_theta_sfdm_1] = y[pba->index_bi_a]*pvecback[pba->index_bg_H]*
         (-3.*sin_sfdm(pba,y[pba->index_bi_theta_sfdm_1])+y[pba->index_bi_y1_sfdm_1]) /*Modification*/
-        -2*pba->beta*sqrt(8*_PI_*_G_)*exp(-0.5*y[pba->index_bi_alpha_sfdm_1])*cos_sfdm(pba,0.5*y[pba->index_bi_theta_sfdm_1])*dy[pba->index_bi_phi_prime_scf]/(sqrt(6.)*pvecback[pba->index_bg_H]);
+        -2*pba->int_sf*cos_sfdm(pba,0.5*y[pba->index_bi_theta_sfdm_1])*sin_sfdm(pba,0.5*y[pba->index_bi_theta_sfdm_1])*dy[pba->index_bi_phi_prime_scf]*dy[pba->index_bi_phi_prime_scf]/(y[pba->index_bi_a]);
       dy[pba->index_bi_y1_sfdm_1] = y[pba->index_bi_a]*pvecback[pba->index_bg_H]*
         (1.5*(1.+pvecback[pba->index_bg_w_tot_1])*y[pba->index_bi_y1_sfdm_1]
         + y2_sfdm(pba, y[pba->index_bi_alpha_sfdm_1], y[pba->index_bi_theta_sfdm_1], y[pba->index_bi_y1_sfdm_1], pba->sfdm_parameters_1[1])*
@@ -2513,7 +2525,7 @@ int background_derivs(
     dy[pba->index_bi_phi_scf] = y[pba->index_bi_phi_prime_scf];
     dy[pba->index_bi_phi_prime_scf] = - y[pba->index_bi_a]*
       (2*pvecback[pba->index_bg_H]*y[pba->index_bi_phi_prime_scf]
-       + y[pba->index_bi_a]*dV_scf(pba,y[pba->index_bi_phi_scf])) + pba->beta*y[pba->index_bi_a]*pvecback[pba->index_bg_H]*sqrt(6.)*exp(0.5*y[pba->index_bi_alpha_sfdm_1])*sin_sfdm(pba,0.5*y[pba->index_bi_theta_sfdm_1])/(sqrt(8*_PI_*_G_));
+       + y[pba->index_bi_a]*dV_scf(pba,y[pba->index_bi_phi_scf])) - pba->int_sf*y[pba->index_bi_a]*pvecback[pba->index_bg_H]*pvecback[pba->index_bg_H]*6.*exp(y[pba->index_bi_alpha_sfdm_1])*sin_sfdm(pba,0.5*y[pba->index_bi_theta_sfdm_1])*sin_sfdm(pba,0.5*y[pba->index_bi_theta_sfdm_1])/(8*_PI_*_G_);
        
   }
 
@@ -2670,3 +2682,83 @@ double ddV_scf(
                double phi) {
   return 1.45161*1.e113*(ddV_e_scf(pba,phi)*V_p_scf(pba,phi) + 2*dV_e_scf(pba,phi)*dV_p_scf(pba,phi) + V_e_scf(pba,phi)*ddV_p_scf(pba,phi));
 }
+
+/**Modificación: Adding new potentials*/
+/* exp puro: V = V0 * exp(-lambda * phi)  con [lambda, V0] */
+double V_exp_pure(struct background *pba, double phi){
+  double scf_lambda = pba->scf_parameters[0];
+  double scf_V0     = pba->scf_parameters[1];
+  return scf_V0 * exp(-scf_lambda*phi);
+}
+
+double dV_exp_pure(struct background *pba, double phi){
+  double scf_lambda = pba->scf_parameters[0];
+  double scf_V0     = pba->scf_parameters[1];
+  return -scf_lambda * scf_V0 * exp(-scf_lambda*phi);
+}
+double ddV_exp_pure(struct background *pba, double phi){
+  double scf_lambda = pba->scf_parameters[0];
+  double scf_V0     = pba->scf_parameters[1];
+  return (scf_lambda*scf_lambda) * scf_V0 * exp(-scf_lambda*phi);
+}
+
+/* exp × poly explícito: V = V0 * exp(-lambda*phi) * ( (phi-B)^alpha + A )  con [lambda, alpha, A, B, V0] */
+double V_exp_poly(struct background *pba, double phi){
+  double scf_lambda = pba->scf_parameters[0];
+  double scf_alpha  = pba->scf_parameters[1];
+  double scf_A      = pba->scf_parameters[2];
+  double scf_B      = pba->scf_parameters[3];
+  double scf_V0     = pba->scf_parameters[4];
+  return scf_V0 * exp(-scf_lambda*phi) * ( pow(phi-scf_B,scf_alpha) + scf_A );
+}
+double dV_exp_poly(struct background *pba, double phi){
+  double scf_lambda = pba->scf_parameters[0];
+  double scf_alpha  = pba->scf_parameters[1];
+  double scf_A      = pba->scf_parameters[2];
+  double scf_B      = pba->scf_parameters[3];
+  double scf_V0     = pba->scf_parameters[4];
+  double P = pow(phi-scf_B,scf_alpha) + scf_A;
+  double dP = scf_alpha*pow(phi-scf_B,scf_alpha-1.0);
+  double e  = exp(-scf_lambda*phi);
+  return scf_V0 * ( -scf_lambda*e*P + e*dP ); /**Check units*/
+}
+double ddV_exp_poly(struct background *pba, double phi){
+  double scf_lambda = pba->scf_parameters[0];
+  double scf_alpha  = pba->scf_parameters[1];
+  double scf_B      = pba->scf_parameters[3];
+  double scf_V0     = pba->scf_parameters[4];
+  double e  = exp(-scf_lambda*phi);
+  double t  = phi - scf_B;
+  double P  = pow(t,scf_alpha);
+  double dP = (scf_alpha>=1.0)? scf_alpha*pow(t,scf_alpha-1.0) : 0.0;
+  double ddP= (scf_alpha>=2.0)? scf_alpha*(scf_alpha-1.0)*pow(t,scf_alpha-2.0) : 0.0;
+  /* dd[V0 e^{-λφ} (P + A)] = V0 [ (λ^2 e)(P+A) - 2λ e dP + e ddP ] */
+  return scf_V0 * ( (scf_lambda*scf_lambda)*e*(P + pba->scf_parameters[2]) - 2.0*scf_lambda*e*dP + e*ddP );
+}
+
+/**Selecting the potential */
+double V_scf_generic(struct background *pba, double phi){
+  switch(pba->scf_potential){
+    case scf_pot_exp:      return V_exp_pure(pba,phi);
+    case scf_pot_exp_poly: return V_exp_poly(pba,phi);
+    case scf_pot_AS:
+    default:               return V_scf(pba,phi);   /* usa TU AS original */
+  }
+}
+double dV_scf_generic(struct background *pba, double phi){
+  switch(pba->scf_potential){
+    case scf_pot_exp:      return dV_exp_pure(pba,phi);
+    case scf_pot_exp_poly: return dV_exp_poly(pba,phi);
+    case scf_pot_AS:
+    default:               return dV_scf(pba,phi);  /* usa TU AS original */
+  }
+}
+double ddV_scf_generic(struct background *pba, double phi){
+  switch(pba->scf_potential){
+    case scf_pot_exp:      return ddV_exp_pure(pba,phi);
+    case scf_pot_exp_poly: return ddV_exp_poly(pba,phi);
+    case scf_pot_AS:
+    default:               return ddV_scf(pba,phi); /* usa TU AS original */
+  }
+}
+
