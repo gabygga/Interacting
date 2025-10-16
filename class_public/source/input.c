@@ -1277,22 +1277,144 @@ int input_read_parameters(
     }
 
   }
-
+/**
   /* Additional SCF parameters: */
-  if (pba->Omega0_scf != 0.){
-    /** - Read parameters describing scalar field potential */
+  
+  /* Modificación: SCF encendido si Omega0_scf != 0. */
+if (pba->Omega0_scf != 0.) {
+
+  /* 1) Selector de potencial: scf_potential = AS | exp |  V0AS | axd */
+  class_call(parser_read_string(pfc,"scf_potential",&string1,&flag1,errmsg),
+             errmsg,errmsg);
+  if (flag1 == _TRUE_) {
+    if ((strstr(string1,"AS") != NULL) || (strstr(string1,"albrecht_skordis") != NULL)) {
+      pba->scf_potential = scf_pot_AS;
+    }
+    else if ((strstr(string1,"exp") != NULL) && (strstr(string1,"exponential") == NULL)) {
+      pba->scf_potential = scf_pot_exp;
+    }
+    else if ((strstr(string1,"exp_poly") != NULL) && (strstr(string1,"V0_AS") == NULL)) {
+      pba->scf_potential = scf_pot_exp_poly;
+    }
+    else if ((strstr(string1,"axd") != NULL) || (strstr(string1,"axio_dilaton") != NULL)) {
+      pba->scf_potential = scf_pot_axd;
+    }
+    else {
+      class_stop(errmsg,
+        "Unknown scf_potential='%s'. Use AS | exp | V0AS | axd.",string1);
+    }
+  }
+  else {
+    /* Retrocompatibilidad: si no se da scf_potential, usar AS por defecto */
+    pba->scf_potential = scf_pot_AS;
+  }
+
+  /* 2) Leer lista scf_parameters (tú ya lo hacías) */
+  class_call(parser_read_list_of_doubles(pfc,
+                                         "scf_parameters",
+                                         &(pba->scf_parameters_size),
+                                         &(pba->scf_parameters),
+                                         &flag1,
+                                         errmsg),
+             errmsg,errmsg);
+
+  /* 3) Validar tamaño mínimo según el potencial (sin contar ICs manuales) */
+  /* Nota: si attractor_ic_scf = no, los dos últimos son (phi_ini, phi'_ini). */
+  int min_core = 0; /* parámetros “duros” del potencial */
+  if (pba->scf_potential == scf_pot_AS)      min_core = 4; /* [λ, alpha, A, B]*/
+  if (pba->scf_potential == scf_pot_exp)     min_core = 2; /* [λ, V0] */
+  if (pba->scf_potential == scf_pot_exp_poly)     min_core = 5; /* [λ, alpha, A, B, V0] */
+  if (pba->scf_potential == scf_pot_axd)     min_core = 5;
+
+  /* 4) Shooting: índice válido dentro de scf_parameters */
+  class_read_int("scf_tuning_index",pba->scf_tuning_index);
+  class_test(pba->scf_tuning_index >= pba->scf_parameters_size,
+             errmsg,
+             "Tuning index scf_tuning_index = %d is larger than the number of entries %d in scf_parameters. Check your .ini file.",
+             pba->scf_tuning_index,pba->scf_parameters_size);
+  /* Asigna el parámetro de disparo (V0 típico) */
+  class_read_double("scf_shooting_parameter",pba->scf_parameters[pba->scf_tuning_index]);
+
+  /* 5) IC: attractor o manual (tu lógica existente) */
+  class_call(parser_read_string(pfc,"attractor_ic_scf",&string1,&flag1,errmsg),
+             errmsg,errmsg);
+  if (flag1 == _TRUE_) {
+    if ((strstr(string1,"y") != NULL) || (strstr(string1,"Y") != NULL)) {
+      pba->attractor_ic_scf = _TRUE_;
+      /* Sólo checa que haya al menos los “core” del potencial */
+      class_test(pba->scf_parameters_size < min_core,
+        errmsg,
+        "For scf_potential='%s' you must provide at least %d entries in scf_parameters (got %d).",
+        (pba->scf_potential==scf_pot_AS)?"AS":(pba->scf_potential==scf_pot_exp?"exp":"axd"),
+        min_core,pba->scf_parameters_size);
+    }
+    else {
+      pba->attractor_ic_scf = _FALSE_;
+      /* Necesitas los core + 2 ICs al final */
+      class_test(pba->scf_parameters_size < (min_core+2),
+        errmsg,
+        "Since you are not using attractor initial conditions, you must specify phi and phi' as the last two entries in scf_parameters. For scf_potential='%s' provide at least %d entries (got %d).",
+        (pba->scf_potential==scf_pot_AS)?"AS":(pba->scf_potential==scf_pot_exp?"exp":"axd"),
+        min_core+2,pba->scf_parameters_size);
+      pba->phi_ini_scf        = pba->scf_parameters[pba->scf_parameters_size-2];
+      pba->phi_prime_ini_scf  = pba->scf_parameters[pba->scf_parameters_size-1];
+    }
+  }
+  else {
+    /* Si no se define attractor_ic_scf, conserva tu default de arriba o fija uno aquí */
+    pba->attractor_ic_scf = _TRUE_;
+    class_test(pba->scf_parameters_size < min_core,
+      errmsg,
+      "For scf_potential='%s' you must provide at least %d entries in scf_parameters (got %d).",
+      (pba->scf_potential==scf_pot_AS)?"AS":(pba->scf_potential==scf_pot_exp?"exp":"axd"),
+      min_core,pba->scf_parameters_size);
+  }
+
+  /* 6) Mensaje informativo sobre λ (tu aviso original) */
+  
+  if (pba->background_verbose > 1) {
+  double lam = fabs(pba->scf_parameters[0]);
+
+  switch(pba->scf_potential) {
+    case scf_pot_exp:
+      if (lam < sqrt(3.0))
+        printf("SCF(exp): λ=%.2f < √3 ⇒ no tracking in matter era.\n", lam);
+      break;
+
+    case scf_pot_AS:
+      if (lam < sqrt(3.0))
+        printf("SCF(AS): λ=%.2f < √3 ⇒ no standard exponential tracking; offset C may mimic Λ.\n", lam);
+      break;
+    case scf_pot_exp_poly:
+      if (lam < sqrt(3.0))
+        printf("SCF(AS): λ=%.2f < √3 ⇒ no standard exponential tracking; offset C may mimic Λ.\n", lam);
+      break;
+    case scf_pot_axd:
+      {
+        double xi = pba->scf_parameters[1]; /* suponiendo [λ, ξ, V0] */
+        printf("SCF(axd): λ=%.2f, ξ=%.2f ⇒ wφ ≈ (λ−2ξ)/(λ+2ξ).\n", lam, xi);
+      }
+      break;
+  }
+}
+}
+
+  
+  
+/*  if (pba->Omega0_scf != 0.){
+    /** - Read parameters describing scalar field potential 
     class_call(parser_read_list_of_doubles(pfc,
                                            "scf_parameters",
                                            &(pba->scf_parameters_size),
                                            &(pba->scf_parameters),
                                            &flag1,
-                                           errmsg),
+                                           errmsg), 
                errmsg,errmsg);
     class_read_int("scf_tuning_index",pba->scf_tuning_index);
     class_test(pba->scf_tuning_index >= pba->scf_parameters_size,
                errmsg,
                "Tuning index scf_tuning_index = %d is larger than the number of entries %d in scf_parameters. Check your .ini file.",pba->scf_tuning_index,pba->scf_parameters_size);
-    /** - Assign shooting parameter */
+    /** - Assign shooting parameter 
     class_read_double("scf_shooting_parameter",pba->scf_parameters[pba->scf_tuning_index]);
 
     scf_lambda = pba->scf_parameters[0];
@@ -1320,7 +1442,7 @@ int input_read_parameters(
         pba->phi_prime_ini_scf = pba->scf_parameters[pba->scf_parameters_size-1];
       }
     }
-  }
+  }*/
 
   /** (b) assign values to thermodynamics cosmological parameters */
 
@@ -2741,7 +2863,7 @@ int input_read_parameters(
   class_read_double("tol_ncdm_initial_w",ppr->tol_ncdm_initial_w);
   class_read_double("safe_phi_scf",ppr->safe_phi_scf);
 /*MODIFICATION */
-  class_read_double("beta", pba->beta);
+  class_read_double("int_sf", pba->int_sf);
 
   /** - (h.2.) parameters related to the thermodynamics */
 
