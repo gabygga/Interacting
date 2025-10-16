@@ -12,6 +12,14 @@
 
 enum spatial_curvature {flat,open,closed};
 
+/* Selector de potencial SCF *//**Modification: Adding different potentials*/
+enum scf_potential_type {
+  scf_pot_AS,     /* Albrecht–Skordis (default) */
+  scf_pot_exp,        /* V(φ) = V0 * exp(-λ φ) */
+  scf_pot_exp_poly,    /* V(φ) =V0 *AS */
+  scf_pot_axd
+};
+
 /**
  * All background parameters and evolution that other modules need to know.
  *
@@ -37,7 +45,7 @@ struct background
 
   //@{
   
-  double beta; /**Modification, interaction sfdm quint*/
+  double int_sf; /**Modification, interaction sfdm quint*/
 
   double H0; /**< \f$ H_0 \f$: Hubble parameter (in fact, [\f$H_0/c\f$]) in \f$ Mpc^{-1} \f$ */
 
@@ -112,7 +120,7 @@ struct background
   //double scf_alpha;  /**< \f$ \alpha \f$ : Albrecht-Skordis polynomial slope */
   //double scf_B; /**< \f$ \alpha \f$ : Albrecht-Skordis field shift */
   //double scf_A; /**< \f$ \alpha \f$ : Albrecht-Skordis offset */
-
+  enum  scf_potential_type scf_potential; /**Modification: Adding different potentials*/
   double Omega0_k; /**< \f$ \Omega_{0_k} \f$: curvature contribution */
 
   int N_ncdm;                            /**< Number of distinguishable ncdm species */
